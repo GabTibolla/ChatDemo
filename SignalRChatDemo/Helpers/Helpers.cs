@@ -102,8 +102,8 @@ namespace ChatDemo.Helpers
         public static ChatDemo.DAO.UsersDB CreateDBUsers(ConfigService _configService)
         {
             string? connectionString = _configService.Get<string>("ConnectionString");
-            string? className = _configService.Get<string>("ClassName");
-            string? projectName = _configService.Get<string>("ProjectName");
+            string? className = _configService.Get<string>("Users:ClassName");
+            string? projectName = _configService.Get<string>("Users:ProjectName");
 
             try
             {
@@ -113,20 +113,71 @@ namespace ChatDemo.Helpers
                     throw new Exception("Configurações de banco de dados não encontradas.");
                 }
 
-                ChatDemo.DAO.UsersDB? usersDB = ChatDemo.DAO.UsersDB.Create(className, projectName, connectionString);
-                if (usersDB == null)
+                ChatDemo.DAO.UsersDB? DBAccess = ChatDemo.DAO.UsersDB.Create(className, projectName, connectionString);
+                if (DBAccess == null)
                 {
                     throw new Exception("Erro ao criar instância do banco de dados.");
                 }
 
-                return usersDB;
+                return DBAccess;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
         }
 
+        public static ChatDemo.DAO.ContactsDB CreateDBContacts(ConfigService _configService, string connectionString)
+        {
+            string? className = _configService.Get<string>("Contacts:ClassName");
+            string? projectName = _configService.Get<string>("Contacts:ProjectName");
+
+            try
+            {
+                if (string.IsNullOrEmpty(connectionString) || string.IsNullOrEmpty(className) || string.IsNullOrEmpty(projectName))
+                {
+                    throw new Exception("Configurações de banco de dados não encontradas.");
+                }
+
+                ChatDemo.DAO.ContactsDB? DBAccess = ChatDemo.DAO.ContactsDB.Create(className, projectName, connectionString);
+                if (DBAccess == null)
+                {
+                    throw new Exception("Erro ao criar instância do banco de dados.");
+                }
+
+                return DBAccess;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public static ChatDemo.DAO.MessagesDB CreateDBMessages(ConfigService _configService, string connectionString)
+        {
+            string? className = _configService.Get<string>("Messages:ClassName");
+            string? projectName = _configService.Get<string>("Messages:ProjectName");
+
+            try
+            {
+                if (string.IsNullOrEmpty(connectionString) || string.IsNullOrEmpty(className) || string.IsNullOrEmpty(projectName))
+                {
+                    throw new Exception("Configurações de banco de dados não encontradas.");
+                }
+
+                ChatDemo.DAO.MessagesDB? DBAccess = ChatDemo.DAO.MessagesDB.Create(className, projectName, connectionString);
+                if (DBAccess == null)
+                {
+                    throw new Exception("Erro ao criar instância do banco de dados.");
+                }
+
+                return DBAccess;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         #endregion
 
         #region [ + WebID ]
@@ -134,6 +185,28 @@ namespace ChatDemo.Helpers
         public static string GenerateWebId()
         {
             return Guid.NewGuid().ToString();
+        }
+
+        #endregion
+
+        #region [ + Identificador ]
+
+        public static string GerarNumberId()
+        {
+            string baseString = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
+
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(baseString));
+
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < 4; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2").ToUpper());
+                }
+
+                return builder.ToString();
+            }
         }
 
         #endregion

@@ -4,17 +4,17 @@
     {
         protected readonly string _connectionString;
 
-        public static UsersDB? Create(string className, string projectName, string connectionString)
+        public UsersDB(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
+        public static ChatDemo.DAO.UsersDB? Create(string className, string projectName, string connectionString)
         {
             var type = Type.GetType($"{className}, {projectName}", true);
             var instance = Activator.CreateInstance(type, connectionString);
 
-            return (UsersDB?) instance;
-        }
-
-        public UsersDB(string connectionString)
-        {
-            _connectionString = connectionString;
+            return (ChatDemo.DAO.UsersDB?)instance;
         }
 
         public virtual bool AddUser(ChatDemo.Data.User user) 

@@ -1,4 +1,5 @@
-﻿@{
+﻿@model ChatDemo.Data.Chat
+@{
     ViewData["Title"] = "Conversa";
     Layout = null;
 }
@@ -32,20 +33,55 @@
         box-shadow: 0 6px 16px rgba(0,0,0,0.5);
     }
 
-    /* Lista de conversas (lado esquerdo) */
     .conversations-list {
         width: 300px;
-        background-color: #4f46e5; /* azul puxado pro roxo */
+        background-color: #4f46e5;
         color: white;
         display: flex;
         flex-direction: column;
     }
 
     .conversations-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         padding: 20px;
         font-size: 20px;
         font-weight: bold;
         border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .logout-button {
+        margin: 20px 0;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #7C3AED;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+        .logout-button:hover {
+            background-color: #6D28D9;
+        }
+
+    .add-button {
+        background-color: transparent;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: white;
+    }
+
+    .conversations-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow-y: auto;
     }
 
     .conversation-item {
@@ -66,7 +102,7 @@
         width: 42px;
         height: 42px;
         border-radius: 50%;
-        background-color: #c4b5fd; /* tom lilás claro (você pode mudar para um azul se preferir) */
+        background-color: #c4b5fd;
         flex-shrink: 0;
     }
 
@@ -76,7 +112,6 @@
         color: white;
     }
 
-    /* Área de chat (lado direito) */
     .chat-container {
         flex: 1;
         display: flex;
@@ -101,7 +136,6 @@
     .message {
         max-width: 60%;
         margin-bottom: 14px;
-        padding: 14px 18px;
         border-radius: 12px;
         clear: both;
     }
@@ -146,106 +180,109 @@
         .chat-input button:active {
             opacity: 0.85;
         }
+
+    a {
+        text-decoration: none;
+    }
+
 </style>
 
 <div class="main-container">
     <!-- Lista de conversas -->
     <div class="conversations-list">
-        <div class="conversations-header">Conversas</div>
+        <div class="conversations-header">
+            <div>Conversas</div>
+            <button class="add-button">+</button>
+        </div>
 
-        <div class="conversation-item">
-            <div class="avatar"></div>
-            <div class="conversation-text">Maria Souza</div>
+        <div class="conversations-content">
+            @{
+                if (Model.Contacts != null && Model.Contacts.Count() > 0)
+                {
+                    foreach (var user in Model.Contacts)
+                    {
+                        <div class="conversation-item" onclick="selecionarContato('@user.NumberId', '@user.MyNumberId')">
+                            <div class="avatar"></div>
+                            <div class="conversation-text">@user.Name</div>
+                        </div>
+                    }
+                }
+            }
         </div>
-        <div class="conversation-item">
-            <div class="avatar"></div>
-            <div class="conversation-text">João Silva</div>
-        </div>
-        <div class="conversation-item">
-            <div class="avatar"></div>
-            <div class="conversation-text">Ana Clara</div>
-        </div>
-        <div class="conversation-item">
-            <div class="avatar"></div>
-            <div class="conversation-text">Carlos Mendes</div>
-        </div>
-        <div class="conversation-item">
-            <div class="avatar"></div>
-            <div class="conversation-text">Fernanda Lima</div>
-        </div>
-        <div class="conversation-item">
-            <div class="avatar"></div>
-            <div class="conversation-text">Pedro Henrique</div>
-        </div>
-        <div class="conversation-item">
-            <div class="avatar"></div>
-            <div class="conversation-text">Paula Ferreira</div>
-        </div>
+
+        <button id="btnLogout"  class="logout-button">Logout</button>
     </div>
+
 
     <!-- Área de chat -->
     <div class="chat-container">
-        <!-- Header do chat -->
-        <div class="chat-header">Contato Z</div>
+        @{
+            if (Model.Contacts != null && Model.Contacts.Count() < 1 && Model.SelectedContact == null)
+            {
+                <!-- Área de mensagens -->
+                <div class="chat-messages" id="chatMessages">
+                </div>
+            }
+            else
+            {
+                if (Model.SelectedContact != null)
+                {
+                    <!-- Header do chat -->
+                    <div class="chat-header">@Model.SelectedContact.Name</div>
 
-        <!-- Área de mensagens -->
-        <div class="chat-messages" id="chatMessages">
-            <div class="message received">Oi, isso aqui tá bem largo e bem alto agora!</div>
-            <div class="message sent">Agora sim, caralho! Era isso que eu queria.</div>
-        </div>
+                    <div class="chat-messages" id="chatMessages">
+                        @foreach (var message in Model.Messages)
+                        {
+                            if (message.Sent)
+                            {
+                                <div class="message sent">@message.Message</div>
+                            }
+                            else
+                            {
+                                <div class="message received">@message.Message</div>
+                            }
+                        }
+                    </div>
 
-        <!-- Campo de input -->
-        <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="Digite uma mensagem...">
-            <button onclick="sendMessage()">Enviar</button>
-        </div>
+                    // <!-- Área de mensagens -->
+                    // <div class="chat-messages" id="chatMessages">
+                    //     <div class="message received">Oi, isso aqui tá bem largo e bem alto agora!</div>
+                    //     <div class="message sent">Agora sim, caralho! Era isso que eu queria.</div>
+                    // </div>
+
+                    <!-- Campo de input -->
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Digite uma mensagem...">
+                        <button onclick="sendMessage()">Enviar</button>
+                    </div>
+                }
+            }
+        }
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
- const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/chatHub")
-    .build();
-
-// Recebe mensagem do servidor
-connection.on("ReceiveMessage", function (user, message) {
-    const li = document.createElement("li");
-    li.textContent = `${user}: ${message}`;
-    document.getElementById("messagesList").appendChild(li);
-});
-
-// Recebe evento "UserTyping"
-connection.on("UserTyping", function (user) {
-    const typingStatus = document.getElementById("typingStatus");
-    typingStatus.textContent = `${user} está digitando...`;
-
-    clearTimeout(typingStatus.timeout);
-    typingStatus.timeout = setTimeout(() => {
-        typingStatus.textContent = "";
-    }, 3000);
-});
-
-connection.start().catch(function (err) {
-    return console.error(err.toString());
-});
-
-// Botão enviar
-document.getElementById("sendButton").addEventListener("click", function () {
-    const user = document.getElementById("userInput").value;
-    const message = document.getElementById("messageInput").value;
-    connection.invoke("SendMessage", user, message).catch(function (err) {
-        return console.error(err.toString());
+    
+    $(document).ready(function(){
+        $("#btnLogout").click(function(){
+             $.ajax({
+             url: "/Login/LogOut",
+             success: function (response) {
+             }
+         });
+        });
     });
-    document.getElementById("messageInput").value = "";
-});
 
-// Evento de digitação
-document.getElementById("messageInput").addEventListener("input", function () {
-    const user = document.getElementById("userInput").value;
-    connection.invoke("Typing", user).catch(function (err) {
-        return console.error(err.toString());
-    });
-});
-
+    function selecionarContato(numberId, numberIdManager) {
+         $.ajax({
+             url: "/Chat/ContatoSelecionado",
+             type: "POST",
+             contentType: "application/json",
+             data: JSON.stringify({ numberId: numberId, myNumberId: numberIdManager }),
+             success: function (response) {
+                 window.location.href = "/Chat/Conversa"; // Redireciona após a resposta
+             }
+         });
+     }
 </script>

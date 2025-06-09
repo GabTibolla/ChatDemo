@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatDemo", "SignalRChatDemo\ChatDemo.csproj", "{78C057F2-3ADE-4A61-9B8C-B56B290843C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatDemo", "SignalRChatDemo\ChatDemo.csproj", "{78C057F2-3ADE-4A61-9B8C-B56B290843C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatDemo.DAO", "ChatDemo.DAO\ChatDemo.DAO.csproj", "{8DC7556B-79DE-48B7-9746-89B7F2EFD8B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatDemo.DAO", "ChatDemo.DAO\ChatDemo.DAO.csproj", "{8DC7556B-79DE-48B7-9746-89B7F2EFD8B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatDemo.DAO.SQLite", "ChatDemo.DAO.SQLite\ChatDemo.DAO.SQLite.csproj", "{83625F4F-ECDA-4CBE-95EE-C549D676F0FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatDemo.DAO.SQLite", "ChatDemo.DAO.SQLite\ChatDemo.DAO.SQLite.csproj", "{83625F4F-ECDA-4CBE-95EE-C549D676F0FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatDemo.Data", "ChatDemo.Data\ChatDemo.Data.csproj", "{1D9BF8F1-5279-4BB1-B67A-E58CAF6F3CDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatDemo.Data", "ChatDemo.Data\ChatDemo.Data.csproj", "{1D9BF8F1-5279-4BB1-B67A-E58CAF6F3CDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

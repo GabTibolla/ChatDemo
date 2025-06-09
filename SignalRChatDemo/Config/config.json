@@ -1,6 +1,19 @@
 {
-  //UsersDB
+  // ConnectionString DB
   "ConnectionString": "Data Source=Database/ChatDemo.db",
-  "ClassName": "ChatDemo.DAO.SQLite.UsersDBSQLite",
-  "ProjectName" : "ChatDemo.DAO.SQLite"
+
+  "Users": {
+    "ClassName": "ChatDemo.DAO.SQLite.UsersDBSQLite",
+    "ProjectName": "ChatDemo.DAO.SQLite"
+  },
+
+  "Contacts": {
+    "ClassName": "ChatDemo.DAO.SQLite.ContactsDBSQLite",
+    "ProjectName": "ChatDemo.DAO.SQLite"
+  },
+
+  "Messages": {
+    "ClassName": "ChatDemo.DAO.SQLite.MessagesDBSQLite",
+    "ProjectName": "ChatDemo.DAO.SQLite"
+  }
 }

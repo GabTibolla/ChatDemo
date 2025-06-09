@@ -23,8 +23,8 @@ namespace ChatDemo.DAO.SQLite
                 transaction = connection.BeginTransaction();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("INSERT INTO Users (Name, Cpf, Password, WebId) ");
-                sql.Append("VALUES (@name, @cpf, @password, @webId)");
+                sql.Append("INSERT INTO Users (Name, Cpf, Password, WebId, NumberId) ");
+                sql.Append("VALUES (@name, @cpf, @password, @webId, @numberId)");
 
                 var command = connection.CreateCommand();
                 command.CommandText = sql.ToString();
@@ -32,7 +32,8 @@ namespace ChatDemo.DAO.SQLite
                 command.Parameters.AddWithValue("@name", user.Name);
                 command.Parameters.AddWithValue("@cpf", user.Cpf);
                 command.Parameters.AddWithValue("@password", user.Password);
-                command.Parameters.AddWithValue("@webId", user.Password);
+                command.Parameters.AddWithValue("@webId", user.WebId);
+                command.Parameters.AddWithValue("@numberId", user.NumberId);
 
                 retorno = command.ExecuteNonQuery() > 0;
                 transaction.Commit();
@@ -63,7 +64,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Name, Cpf, Password, WebId ");
+                sql.Append("SELECT Id, Name, Cpf, Password, WebId, NumberId ");
                 sql.Append("FROM Users ");
                 sql.Append("WHERE Cpf = @cpf");
 
@@ -82,6 +83,7 @@ namespace ChatDemo.DAO.SQLite
                     user.Cpf = reader.GetString(2);
                     user.Password = reader.GetString(3);
                     user.WebId = reader.GetString(4);
+                    user.NumberId = reader.GetString(5);
                 }
 
                 return user;
@@ -108,7 +110,8 @@ namespace ChatDemo.DAO.SQLite
                     Name TEXT,
                     Cpf TEXT,
                     Password TEXT,
-                    WebId TEXT UNIQUE
+                    WebId TEXT UNIQUE,
+                    NumberId TEXT UNIQUE
                 )";
             command.ExecuteNonQuery();
             connection.Close();

@@ -43,6 +43,7 @@ namespace ChatDemo.Controllers
             {
                 new Claim(ClaimTypes.Name, userExists.Name),
                 new Claim("WebId", userExists.WebId),
+                new Claim("NumberId", userExists.NumberId)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, "Login");

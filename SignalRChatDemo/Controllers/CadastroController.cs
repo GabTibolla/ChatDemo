@@ -59,6 +59,7 @@ namespace ChatDemo.Controllers
 
                 user.Password = ChatDemo.Helpers.Helpers.GerarHashSenha(user.Password);
                 user.WebId = ChatDemo.Helpers.Helpers.GenerateWebId();
+                user.NumberId = ChatDemo.Helpers.Helpers.GerarNumberId();
 
                 bool value = usersDB.AddUser(user);
 

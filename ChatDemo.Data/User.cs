@@ -9,5 +9,6 @@
         [System.Text.Json.Serialization.JsonIgnore]
         public string? Password { get; set; }
         public string? WebId { get; set; }
+        public string? NumberId { get; set; }
     }
 }

@@ -1,0 +1,251 @@
+﻿@{
+    ViewData["Title"] = "Conversa";
+    Layout = null;
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f3f4f6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .main-container {
+        display: flex;
+        width: 95vw;
+        height: 95vh;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    }
+
+    /* Lista de conversas (lado esquerdo) */
+    .conversations-list {
+        width: 300px;
+        background-color: #4f46e5; /* azul puxado pro roxo */
+        color: white;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .conversations-header {
+        padding: 20px;
+        font-size: 20px;
+        font-weight: bold;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .conversation-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        transition: background-color 0.2s;
+        gap: 12px;
+    }
+
+        .conversation-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background-color: #c4b5fd; /* tom lilás claro (você pode mudar para um azul se preferir) */
+        flex-shrink: 0;
+    }
+
+    .conversation-text {
+        font-size: 16px;
+        font-weight: 500;
+        color: white;
+    }
+
+    /* Área de chat (lado direito) */
+    .chat-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-header {
+        background-color: #6a11cb;
+        color: white;
+        padding: 20px;
+        font-size: 24px;
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        background-color: #ece5dd;
+        font-size: 18px;
+    }
+
+    .message {
+        max-width: 60%;
+        margin-bottom: 14px;
+        padding: 14px 18px;
+        border-radius: 12px;
+        clear: both;
+    }
+
+        .message.sent {
+            background-color: #dcf8c6;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.received {
+            background-color: white;
+            margin-right: auto;
+            text-align: left;
+        }
+
+    .chat-input {
+        display: flex;
+        border-top: 1px solid #ccc;
+    }
+
+        .chat-input input {
+            flex: 1;
+            border: none;
+            padding: 18px;
+            font-size: 18px;
+        }
+
+        .chat-input button {
+            background-color: #6a11cb;
+            color: white;
+            border: none;
+            padding: 0 30px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+        }
+
+        .chat-input button:active {
+            opacity: 0.85;
+        }
+</style>
+
+<div class="main-container">
+    <!-- Lista de conversas -->
+    <div class="conversations-list">
+        <div class="conversations-header">Conversas</div>
+
+        <div class="conversation-item">
+            <div class="avatar"></div>
+            <div class="conversation-text">Maria Souza</div>
+        </div>
+        <div class="conversation-item">
+            <div class="avatar"></div>
+            <div class="conversation-text">João Silva</div>
+        </div>
+        <div class="conversation-item">
+            <div class="avatar"></div>
+            <div class="conversation-text">Ana Clara</div>
+        </div>
+        <div class="conversation-item">
+            <div class="avatar"></div>
+            <div class="conversation-text">Carlos Mendes</div>
+        </div>
+        <div class="conversation-item">
+            <div class="avatar"></div>
+            <div class="conversation-text">Fernanda Lima</div>
+        </div>
+        <div class="conversation-item">
+            <div class="avatar"></div>
+            <div class="conversation-text">Pedro Henrique</div>
+        </div>
+        <div class="conversation-item">
+            <div class="avatar"></div>
+            <div class="conversation-text">Paula Ferreira</div>
+        </div>
+    </div>
+
+    <!-- Área de chat -->
+    <div class="chat-container">
+        <!-- Header do chat -->
+        <div class="chat-header">Contato Z</div>
+
+        <!-- Área de mensagens -->
+        <div class="chat-messages" id="chatMessages">
+            <div class="message received">Oi, isso aqui tá bem largo e bem alto agora!</div>
+            <div class="message sent">Agora sim, caralho! Era isso que eu queria.</div>
+        </div>
+
+        <!-- Campo de input -->
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Digite uma mensagem...">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+ const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/chatHub")
+    .build();
+
+// Recebe mensagem do servidor
+connection.on("ReceiveMessage", function (user, message) {
+    const li = document.createElement("li");
+    li.textContent = `${user}: ${message}`;
+    document.getElementById("messagesList").appendChild(li);
+});
+
+// Recebe evento "UserTyping"
+connection.on("UserTyping", function (user) {
+    const typingStatus = document.getElementById("typingStatus");
+    typingStatus.textContent = `${user} está digitando...`;
+
+    clearTimeout(typingStatus.timeout);
+    typingStatus.timeout = setTimeout(() => {
+        typingStatus.textContent = "";
+    }, 3000);
+});
+
+connection.start().catch(function (err) {
+    return console.error(err.toString());
+});
+
+// Botão enviar
+document.getElementById("sendButton").addEventListener("click", function () {
+    const user = document.getElementById("userInput").value;
+    const message = document.getElementById("messageInput").value;
+    connection.invoke("SendMessage", user, message).catch(function (err) {
+        return console.error(err.toString());
+    });
+    document.getElementById("messageInput").value = "";
+});
+
+// Evento de digitação
+document.getElementById("messageInput").addEventListener("input", function () {
+    const user = document.getElementById("userInput").value;
+    connection.invoke("Typing", user).catch(function (err) {
+        return console.error(err.toString());
+    });
+});
+
+</script>

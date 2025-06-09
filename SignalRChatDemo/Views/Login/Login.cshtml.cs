@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace SignalRChatDemo.Views.Chat
+namespace ChatDemo.Views.Login
 {
     public class LoginModel : PageModel
     {

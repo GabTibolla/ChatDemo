@@ -1,3 +1,6 @@
 {
-  "ConnectionString" :  "DataSource=~/Database/ChatDemo.db"
+  //UsersDB
+  "ConnectionString": "Data Source=Database/ChatDemo.db",
+  "ClassName": "ChatDemo.DAO.SQLite.UsersDBSQLite",
+  "ProjectName" : "ChatDemo.DAO.SQLite"
 }

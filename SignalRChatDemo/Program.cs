@@ -13,6 +13,12 @@ builder.Services.AddSingleton<ConfigService>();
 
 builder.Services.AddSignalR();
 
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.LoginPath = "/Chat/Login";
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -31,6 +37,7 @@ app.UseEndpoints(endpoints => {
     endpoints.MapHub<ChatHub>("/chatHub");
 });
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

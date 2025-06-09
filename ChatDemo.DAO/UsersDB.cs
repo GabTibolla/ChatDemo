@@ -4,6 +4,14 @@
     {
         protected readonly string _connectionString;
 
+        public static UsersDB? Create(string className, string projectName, string connectionString)
+        {
+            var type = Type.GetType($"{className}, {projectName}", true);
+            var instance = Activator.CreateInstance(type, connectionString);
+
+            return (UsersDB?) instance;
+        }
+
         public UsersDB(string connectionString)
         {
             _connectionString = connectionString;
@@ -14,12 +22,12 @@
             throw new NotImplementedException();
         }
 
-        public virtual ChatDemo.Data.User GetUserByMailAndPassword()
+        public virtual ChatDemo.Data.User? GetUserByCpf(string cpf)
         {
             throw new NotImplementedException();
         }
 
-        public virtual List<ChatDemo.Data.User> GetContactForUser(string id)
+        public virtual List<ChatDemo.Data.User>? GetContactForUser(string id)
         {
             throw new NotImplementedException();
         }

@@ -8,7 +8,13 @@
 
   <ItemGroup>
     <Folder Include="Config\" />
-    <Folder Include="Database\" />
+    <Folder Include="Database\Users\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ChatDemo.DAO.SQLite\ChatDemo.DAO.SQLite.csproj" />
+    <ProjectReference Include="..\ChatDemo.DAO\ChatDemo.DAO.csproj" />
+    <ProjectReference Include="..\ChatDemo.Data\ChatDemo.Data.csproj" />
   </ItemGroup>
 
 </Project>

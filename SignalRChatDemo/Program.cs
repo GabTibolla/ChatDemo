@@ -6,6 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
                      .AddJsonFile("Config\\config.json", false, true);
 
+if (!Directory.Exists(Directory.GetCurrentDirectory() + "\\Database"))
+{
+    Directory.CreateDirectory(Directory.GetCurrentDirectory() + "\\Database");
+}
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

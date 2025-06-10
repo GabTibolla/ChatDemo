@@ -1,0 +1,28 @@
+﻿@model ChatDemo.Data.Chat
+
+@if (Model.SelectedContact != null)
+{
+    <div class="chat-header">
+        <div>@Model.SelectedContact.Name</div>
+        <div id="typing-indicator" style="font-size: 12px; color: gray; margin-top: 2px;"></div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        @foreach (var message in Model.Messages)
+        {
+            if (message.Sent)
+            {
+                <div class="message sent">@message.Message</div>
+            }
+            else
+            {
+                <div class="message received">@message.Message</div>
+            }
+        }
+    </div>
+
+    <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Digite uma mensagem...">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+}

@@ -1,0 +1,19 @@
+﻿@model IEnumerable<ChatDemo.Data.Contacts>
+
+<div class="conversations-content">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var user in Model)
+        {
+            <div class="conversation-item" onclick="selecionarContato('@user.WebId', '@user.MyNumberId')">
+                <div class="avatar"></div>
+
+                <div style="display: flex; flex-direction: column;">
+                    <div class="conversation-text">@user.Name</div>
+                    <div id="typing-indicator-@user.WebId" class="typing-indicator" style="font-size: 12px; color: gray; margin-top: 2px;"></div>
+                </div>
+            </div>
+
+        }
+    }
+</div>

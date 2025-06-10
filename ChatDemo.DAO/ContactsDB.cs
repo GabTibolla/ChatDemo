@@ -33,7 +33,7 @@ namespace ChatDemo.DAO
             throw new NotImplementedException();
         }
 
-        public virtual ChatDemo.Data.Contacts GetContactByNumberId(string numberId, string myNumberId)
+        public virtual ChatDemo.Data.Contacts GetContactByWebIdAndNumberId(string webId, string myNumberId)
         {
             throw new NotImplementedException();
         }

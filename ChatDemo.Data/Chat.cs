@@ -5,6 +5,6 @@
         public List<Contacts>? Contacts { get; set; }
         public List<Messages>? Messages { get; set; }
         public Contacts? SelectedContact { get; set; }
-        public string? NumberIdLogged { get; set; }
+        public User? UserLogged { get; set; }
     }
 }

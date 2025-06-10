@@ -14,5 +14,6 @@ namespace ChatDemo.Data
         public string? MyNumberId { get; set; }
         public int? LastMessageId { get; set; }
         public DateTime? LastMessageDate { get; set; }
+        public string WebId { get; set; }
     }
 }

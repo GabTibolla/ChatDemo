@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
+using System.Text.Json;
 
 namespace SignalRChatDemo.Controllers
 {
@@ -13,17 +14,17 @@ namespace SignalRChatDemo.Controllers
             _configServices = configServices;
         }
 
-        private static ChatDemo.Data.Chat _chat = new ChatDemo.Data.Chat();
-
+        [HttpGet]
         public IActionResult Conversa()
         {
-            string? numberId = User.FindFirst("NumberId")?.Value;
+            string? userJson = User.FindFirst("User")?.Value;
+            ChatDemo.Data.User? user = JsonSerializer.Deserialize<ChatDemo.Data.User>(userJson);
 
             string connectionString = GetConnectionString();
             var contactsDb = ChatDemo.Helpers.Helpers.CreateDBContacts(_configServices, connectionString);
 
             // Buscando lista de contatos
-            List<ChatDemo.Data.Contacts>? listContacts = contactsDb.GetAllContacts(numberId);
+            List<ChatDemo.Data.Contacts>? listContacts = contactsDb.GetAllContacts(user.NumberId);
 
             // Ordenando por última mensagem
             if (listContacts != null && listContacts.Count() > 0)
@@ -31,21 +32,30 @@ namespace SignalRChatDemo.Controllers
                 listContacts = listContacts.OrderByDescending(p => p.LastMessageDate).ToList();
             }
 
-            _chat.Contacts = listContacts;
+            ChatDemo.Data.Chat chat = new ChatDemo.Data.Chat();
+            chat.Contacts = listContacts;
+            chat.SelectedContact = null;// new ChatDemo.Data.Contacts();
+            chat.UserLogged = user;
+            chat.Messages = new List<ChatDemo.Data.Messages>();
 
-            return View("Conversa", _chat);
+            return View("Conversa", chat);
         }
 
         [HttpPost]
         public IActionResult ContatoSelecionado([FromBody] ChatDemo.Data.Contacts contato)
         {
+            ChatDemo.Data.Chat chat = new ChatDemo.Data.Chat();
+
             string connectionString = GetConnectionString();
             var contactsDb = ChatDemo.Helpers.Helpers.CreateDBContacts(_configServices, connectionString);
 
-            ChatDemo.Data.Contacts contact = contactsDb.GetContactByNumberId(contato.NumberId, contato.MyNumberId);
+            ChatDemo.Data.Contacts contact = contactsDb.GetContactByWebIdAndNumberId(contato.WebId, contato.MyNumberId);
             if (contact == null)
             {
-                return View("Conversa");
+                // Se não achou o contato, manda uma área de chat vazia
+                chat.SelectedContact = null;
+                chat.Messages = new List<ChatDemo.Data.Messages>();
+                return PartialView("_ChatArea", chat);
             }
 
             var messagesDB = ChatDemo.Helpers.Helpers.CreateDBMessages(_configServices, connectionString);
@@ -58,10 +68,10 @@ namespace SignalRChatDemo.Controllers
 
             messages = messages.OrderBy(p => p.Datetime).ToList();
 
-            _chat.SelectedContact = contact;
-            _chat.Messages = messages;
+            chat.SelectedContact = contact;
+            chat.Messages = messages;
 
-            return View("Conversa", _chat);
+            return PartialView("_ChatArea", chat);
         }
 
         private string GetConnectionString()

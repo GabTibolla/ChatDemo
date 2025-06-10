@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace ChatDemo.Controllers
 {
@@ -43,7 +44,7 @@ namespace ChatDemo.Controllers
             {
                 new Claim(ClaimTypes.Name, userExists.Name),
                 new Claim("WebId", userExists.WebId),
-                new Claim("NumberId", userExists.NumberId)
+                new Claim("User", JsonSerializer.Serialize(userExists))
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, "Login");
@@ -60,7 +61,7 @@ namespace ChatDemo.Controllers
         public async Task<IActionResult> LogOut()
         {
             await HttpContext.SignOutAsync("CookieAuth");
-            return RedirectToAction("Index", "Home");
+            return Json(new { redirectUrl = Url.Action("Index", "Home") });
         }
     }
 }

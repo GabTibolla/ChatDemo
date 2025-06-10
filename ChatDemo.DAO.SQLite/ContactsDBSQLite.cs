@@ -18,7 +18,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate ");
+                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate, WebId ");
                 sql.Append("FROM Contacts ");
                 sql.Append("WHERE MyNumberId = @myNumberId ");
 
@@ -38,6 +38,7 @@ namespace ChatDemo.DAO.SQLite
                     contact.MyNumberId = reader.IsDBNull(3) ? null : reader.GetString(3);
                     contact.LastMessageId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
                     contact.LastMessageDate = reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5));
+                    contact.WebId = reader.IsDBNull(6) ? null : reader.GetString(6);
 
                     contacts.Add(contact);
                 }
@@ -54,7 +55,7 @@ namespace ChatDemo.DAO.SQLite
             }
         }
 
-        public override ChatDemo.Data.Contacts GetContactByNumberId(string numberId, string myNumberId)
+        public override ChatDemo.Data.Contacts GetContactByWebIdAndNumberId(string webId, string myNumberId)
         {
             var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
 
@@ -63,14 +64,14 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate ");
+                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate, WebId ");
                 sql.Append("FROM Contacts ");
-                sql.Append("WHERE NumberId = @numberId AND MyNumberId = @myNumberId ");
+                sql.Append("WHERE WebId = @webId AND MyNumberId = @myNumberId ");
 
                 var command = connection.CreateCommand();
                 command.CommandText = sql.ToString();
 
-                command.Parameters.AddWithValue("@numberId", numberId);
+                command.Parameters.AddWithValue("@webId", webId);
                 command.Parameters.AddWithValue("@myNumberId", myNumberId);
                 Microsoft.Data.Sqlite.SqliteDataReader reader = command.ExecuteReader();
 
@@ -84,6 +85,7 @@ namespace ChatDemo.DAO.SQLite
                     contact.MyNumberId = reader.IsDBNull(3) ? null : reader.GetString(3);
                     contact.LastMessageId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
                     contact.LastMessageDate = reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5));
+                    contact.WebId = reader.IsDBNull(6) ? null : reader.GetString(6);
                 }
 
                 return contact;
@@ -111,7 +113,8 @@ namespace ChatDemo.DAO.SQLite
                     NumberId TEXT,
                     MyNumberId TEXT,
                     LastMessageId INTEGER,
-                    LastMessageDate TEXT
+                    LastMessageDate TEXT,
+                    WebId TEXT NOT NULL
                 )";
             command.ExecuteNonQuery();
             connection.Close();

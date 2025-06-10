@@ -23,12 +23,17 @@ namespace ChatDemo.DAO
             return (ChatDemo.DAO.ContactsDB?)instance;
         }
 
-        public virtual List<ChatDemo.Data.Contacts>? GetAllContacts(string numberIdManager)
+        public virtual List<ChatDemo.Data.Contacts>? GetAllContacts(string myNumberId)
         {
             throw new NotImplementedException();
         }
 
-        public virtual ChatDemo.Data.Contacts GetContactByNumberId(string numberId, string numberIdManager)
+        public virtual ChatDemo.Data.Contacts GetContact(string webId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual ChatDemo.Data.Contacts GetContactByNumberId(string numberId, string myNumberId)
         {
             throw new NotImplementedException();
         }

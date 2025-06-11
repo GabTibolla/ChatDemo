@@ -23,11 +23,19 @@ namespace ChatDemo.DAO
             return (ChatDemo.DAO.ContactsDB?)instance;
         }
 
-        public virtual List<ChatDemo.Data.Contacts>? GetAllContacts(string myNumberId)
+        public virtual bool CreateContact(ChatDemo.Data.Contacts contact)
         {
             throw new NotImplementedException();
         }
 
+        public virtual List<ChatDemo.Data.Contacts>? GetAllContacts(string myNumberId)
+        {
+            throw new NotImplementedException();
+        }
+        public virtual ChatDemo.Data.Contacts? GetContactByNumberIdAndMyNumberId(string numberId, string myNumberId)
+        {
+            throw new NotImplementedException();
+        }
         public virtual ChatDemo.Data.Contacts GetContact(string webId)
         {
             throw new NotImplementedException();

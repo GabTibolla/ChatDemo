@@ -90,3 +90,15 @@ main p {
     line-height: 1.5;
     text-shadow: 1px 1px 6px rgba(0,0,0,0.3);
 }
+
+.buttonDenied {
+    background-color: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 8px 22px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}

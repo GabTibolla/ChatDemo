@@ -16,12 +16,16 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<ConfigService>();
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
-        options.LoginPath = "/Chat/Login";
+        options.LoginPath = "/Login/Login";
+        options.AccessDeniedPath = "/Home/Denied";
     });
 
 var app = builder.Build();

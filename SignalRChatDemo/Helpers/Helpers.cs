@@ -127,8 +127,9 @@ namespace ChatDemo.Helpers
             }
         }
 
-        public static ChatDemo.DAO.ContactsDB CreateDBContacts(ConfigService _configService, string connectionString)
+        public static ChatDemo.DAO.ContactsDB CreateDBContacts(ConfigService _configService)
         {
+            string? connectionString = _configService.Get<string>("ConnectionString");
             string? className = _configService.Get<string>("Contacts:ClassName");
             string? projectName = _configService.Get<string>("Contacts:ProjectName");
 
@@ -153,8 +154,9 @@ namespace ChatDemo.Helpers
             }
         }
 
-        public static ChatDemo.DAO.MessagesDB CreateDBMessages(ConfigService _configService, string connectionString)
+        public static ChatDemo.DAO.MessagesDB CreateDBMessages(ConfigService _configService)
         {
+            string? connectionString = _configService.Get<string>("ConnectionString");
             string? className = _configService.Get<string>("Messages:ClassName");
             string? projectName = _configService.Get<string>("Messages:ProjectName");
 

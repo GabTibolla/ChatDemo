@@ -8,11 +8,13 @@ namespace ChatDemo.DAO.SQLite
         public UsersDBSQLite(string stringConnection) : base(stringConnection)
         {
             CreateTableUser();
+            CreateTableContacts();
+            CreateTableMessages();
         }
 
         public override bool AddUser(ChatDemo.Data.User user)
         {
-            var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
+            var connection = CriarConnection();
             bool retorno = false;
 
             Microsoft.Data.Sqlite.SqliteTransaction? transaction = null;
@@ -55,9 +57,95 @@ namespace ChatDemo.DAO.SQLite
             return retorno;
         }
 
+        public override ChatDemo.Data.User? GetUserByNumberId(string numberId)
+        {
+            var connection = CriarConnection();
+
+            try
+            {
+                connection.Open();
+
+                StringBuilder sql = new StringBuilder();
+                sql.Append("SELECT Id, Name, Cpf, Password, WebId, NumberId ");
+                sql.Append("FROM Users ");
+                sql.Append("WHERE NumberId = @NumberId");
+
+                var command = connection.CreateCommand();
+                command.CommandText = sql.ToString();
+
+                command.Parameters.AddWithValue("@NumberId", numberId);
+                Microsoft.Data.Sqlite.SqliteDataReader reader = command.ExecuteReader();
+
+                ChatDemo.Data.User? user = null;
+                if (reader.Read())
+                {
+                    user = new ChatDemo.Data.User();
+                    user.Id = reader.GetInt32(0);
+                    user.Name = reader.GetString(1);
+                    user.Cpf = reader.GetString(2);
+                    user.Password = reader.GetString(3);
+                    user.WebId = reader.GetString(4);
+                    user.NumberId = reader.GetString(5);
+                }
+
+                return user;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public override ChatDemo.Data.User? GetUserByWebId(string wid)
+        {
+            var connection = CriarConnection();
+
+            try
+            {
+                connection.Open();
+
+                StringBuilder sql = new StringBuilder();
+                sql.Append("SELECT Id, Name, Cpf, Password, WebId, NumberId ");
+                sql.Append("FROM Users ");
+                sql.Append("WHERE WebId = @WebId");
+
+                var command = connection.CreateCommand();
+                command.CommandText = sql.ToString();
+
+                command.Parameters.AddWithValue("@WebId", wid);
+                Microsoft.Data.Sqlite.SqliteDataReader reader = command.ExecuteReader();
+
+                ChatDemo.Data.User? user = null;
+                if (reader.Read())
+                {
+                    user = new ChatDemo.Data.User();
+                    user.Id = reader.GetInt32(0);
+                    user.Name = reader.GetString(1);
+                    user.Cpf = reader.GetString(2);
+                    user.Password = reader.GetString(3);
+                    user.WebId = reader.GetString(4);
+                    user.NumberId = reader.GetString(5);
+                }
+
+                return user;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
         public override ChatDemo.Data.User? GetUserByCpf(string cpf)
         {
-            var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
+            var connection = CriarConnection();
 
             try
             {
@@ -98,6 +186,43 @@ namespace ChatDemo.DAO.SQLite
             }
         }
 
+        protected Microsoft.Data.Sqlite.SqliteConnection CriarConnection()
+        {
+            try
+            {
+                var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
+                connection.Open();
+
+                using (var pragmaTimeout = connection.CreateCommand())
+                {
+                    pragmaTimeout.CommandText = "PRAGMA busy_timeout = 15000;";
+                    pragmaTimeout.ExecuteNonQuery();
+                }
+
+                using (var pragmaThreads = connection.CreateCommand())
+                {
+                    pragmaThreads.CommandText = "PRAGMA threads = 2;";
+                    pragmaThreads.ExecuteNonQuery();
+                }
+
+                using (var pragmaCache = connection.CreateCommand())
+                {
+                    pragmaCache.CommandText = "PRAGMA cache_size  = 10000;";
+                    pragmaCache.ExecuteNonQuery();
+                }
+
+                connection.Close();
+
+                return connection;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        #region [ Criação das tabelas ]
+
         private void CreateTableUser()
         {
             var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
@@ -116,5 +241,46 @@ namespace ChatDemo.DAO.SQLite
             command.ExecuteNonQuery();
             connection.Close();
         }
+
+        private void CreateTableMessages()
+        {
+            var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
+
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Messages (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Message TEXT,
+                    DateTime TEXT,
+                    FromNumberId TEXT,
+                    ToNumberId INTEGER,
+                    Sent INTEGER
+                )";
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        private void CreateTableContacts()
+        {
+            var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
+
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Contacts (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Name TEXT,
+                    NumberId TEXT NOT NULL,
+                    MyNumberId TEXT NOT NULL,
+                    LastMessageId INTEGER,
+                    LastMessageDate TEXT,
+                    WebId TEXT NOT NULL
+                )";
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        #endregion
     }
 }

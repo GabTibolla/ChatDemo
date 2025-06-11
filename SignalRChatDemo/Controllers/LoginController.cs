@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text.Json;
 
 namespace ChatDemo.Controllers
 {
+    [AllowAnonymous]
     public class LoginController : Controller
     {
         private readonly ChatDemo.Services.ConfigService _configService;
@@ -43,7 +45,6 @@ namespace ChatDemo.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userExists.Name),
-                new Claim("WebId", userExists.WebId),
                 new Claim("User", JsonSerializer.Serialize(userExists))
             };
 

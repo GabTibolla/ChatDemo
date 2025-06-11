@@ -14,6 +14,5 @@ namespace ChatDemo.Data
         public string FromNumberId { get; set; }
         public string ToNumberId { get; set; }
         public bool Sent { get; set; }
-        public string? IdChat { get; set; }
     }
 }

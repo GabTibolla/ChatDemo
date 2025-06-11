@@ -22,6 +22,16 @@
             throw new NotImplementedException();
         }
 
+        public virtual ChatDemo.Data.User? GetUserByNumberId(string numberId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual ChatDemo.Data.User? GetUserByWebId(string wid)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual ChatDemo.Data.User? GetUserByCpf(string cpf)
         {
             throw new NotImplementedException();

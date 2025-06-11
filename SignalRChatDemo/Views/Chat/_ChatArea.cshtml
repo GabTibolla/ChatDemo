@@ -1,10 +1,82 @@
 ﻿@model ChatDemo.Data.Chat
 
+<style>
+     .chat-header {
+        background-color: #6a11cb;
+        color: white;
+        padding: 20px;
+        font-size: 24px;
+    }
+
+    .typing-indicator {
+        font-size: 12px;
+        color: gray;
+        display: block;
+        margin-top: 2px;
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        background-color: #ece5dd;
+        font-size: 18px;
+    }
+
+    .message {
+        max-width: 60%;
+        margin-bottom: 14px;
+        border-radius: 12px;
+        clear: both;
+    }
+
+    .message.sent {
+        background-color: #dcf8c6;
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .message.received {
+        background-color: white;
+        margin-right: auto;
+        text-align: left;
+    }
+
+    .chat-input {
+        display: flex;
+        border-top: 1px solid #ccc;
+    }
+
+    .chat-input input {
+        flex: 1;
+        border: none;
+        padding: 18px;
+        font-size: 18px;
+    }
+
+    .chat-input button {
+        background-color: #6a11cb;
+        color: white;
+        border: none;
+        padding: 0 30px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    .chat-input input:focus {
+        outline: none;
+    }
+
+    .chat-input button:active {
+        opacity: 0.85;
+    }
+</style>
+
 @if (Model.SelectedContact != null)
 {
     <div class="chat-header">
-        <div>@Model.SelectedContact.Name</div>
-        <div id="typing-indicator" style="font-size: 12px; color: gray; margin-top: 2px;"></div>
+        <div>@(Model.SelectedContact.Name ?? Model.SelectedContact.NumberId)</div>
+        <div id="typing-chatArea-@Model.SelectedContact.WebId" style="font-size: 12px; color: gray; margin-top: 2px;"></div>
     </div>
 
     <div class="chat-messages" id="chatMessages">
@@ -23,6 +95,6 @@
 
     <div class="chat-input">
         <input type="text" id="chatInput" placeholder="Digite uma mensagem...">
-        <button onclick="sendMessage()">Enviar</button>
+        <button id="btnSendMessage">Enviar</button>
     </div>
 }

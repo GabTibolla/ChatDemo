@@ -1,15 +1,54 @@
-﻿@model IEnumerable<ChatDemo.Data.Contacts>
+﻿@model ChatDemo.Data.Chat
+
+<style>
+    .conversations-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow-y: auto;
+    }
+
+    .conversation-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        transition: background-color 0.2s;
+        gap: 12px;
+    }
+
+    .conversation-item:hover {
+        background-color: rgba(255,255,255,0.1);
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background-color: #c4b5fd;
+        flex-shrink: 0;
+    }
+
+    .conversation-text {
+        font-size: 16px;
+        font-weight: 500;
+        color: white;
+    }
+
+</style>
 
 <div class="conversations-content">
-    @if (Model != null && Model.Any())
+    @if (Model.Contacts != null && Model.Contacts.Any())
     {
-        foreach (var user in Model)
+        foreach (var user in Model.Contacts)
         {
             <div class="conversation-item" onclick="selecionarContato('@user.WebId', '@user.MyNumberId')">
                 <div class="avatar"></div>
 
                 <div style="display: flex; flex-direction: column;">
-                    <div class="conversation-text">@user.Name</div>
+                    <div class="conversation-text">@(user.Name ?? user.NumberId)</div>
                     <div id="typing-indicator-@user.WebId" class="typing-indicator" style="font-size: 12px; color: gray; margin-top: 2px;"></div>
                 </div>
             </div>

@@ -76,133 +76,126 @@
         color: white;
     }
 
-    .conversations-content {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        overflow-y: auto;
-    }
-
-    .conversation-item {
-        display: flex;
-        align-items: center;
-        padding: 15px 20px;
-        cursor: pointer;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        transition: background-color 0.2s;
-        gap: 12px;
-    }
-
-        .conversation-item:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-
-    .avatar {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        background-color: #c4b5fd;
-        flex-shrink: 0;
-    }
-
-    .conversation-text {
-        font-size: 16px;
-        font-weight: 500;
-        color: white;
-    }
-
     .chat-container {
         flex: 1;
         display: flex;
         flex-direction: column;
     }
 
-    .chat-header {
-        background-color: #6a11cb;
-        color: white;
-        padding: 20px;
-        font-size: 24px;
+    a {
+        text-decoration: none;
     }
 
-    .chat-messages {
-        flex: 1;
-        padding: 24px;
-        overflow-y: auto;
-        background-color: #ece5dd;
-        font-size: 18px;
-    }
-
-    .message {
-        max-width: 60%;
-        margin-bottom: 14px;
+    .custom-modal {
+        background-color: white;
         border-radius: 12px;
-        clear: both;
+        padding: 24px;
+        width: 100%;
+        max-width: 360px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        font-family: Arial, sans-serif;
     }
 
-        .message.sent {
-            background-color: #dcf8c6;
-            margin-left: auto;
-            text-align: right;
-        }
+    .modal-alert {
+        padding: 12px 16px;
+        border-radius: 6px;
+        background-color: #dbeafe; /* azul claro */
+        color: #1e40af; /* azul escuro */
+        font-weight: 500;
+        border: 1px solid #93c5fd;
+        margin-bottom: 16px;
+        font-family: Arial, sans-serif;
+    }
 
-        .message.received {
-            background-color: white;
-            margin-right: auto;
-            text-align: left;
-        }
 
-    .chat-input {
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .modal-title {
+        font-size: 22px;
+        margin-bottom: 16px;
+        color: #4f46e5;
+        text-align: center;
+    }
+
+    .modal-form {
         display: flex;
-        border-top: 1px solid #ccc;
+        flex-direction: column;
+        gap: 12px;
     }
 
-        .chat-input input {
-            flex: 1;
-            border: none;
-            padding: 18px;
-            font-size: 18px;
+    .modal-input {
+        padding: 10px 14px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+        width: 100%;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .modal-save {
+        background-color: #4f46e5;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+        .modal-save:hover {
+            background-color: #4338ca;
         }
 
-        .chat-input button {
-            background-color: #6a11cb;
-            color: white;
-            border: none;
-            padding: 0 30px;
-            cursor: pointer;
-            font-size: 18px;
+    .modal-cancel {
+        background-color: #e5e7eb;
+        color: #1f2937;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+        .modal-cancel:hover {
+            background-color: #d1d5db;
         }
 
-        .chat-input input:focus {
-            outline: none;
+        .conversas {
+             flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow-y: auto;
         }
-
-        .chat-input button:active {
-            opacity: 0.85;
-        }
-
-        .typing-indicator {
-            font-size: 12px;
-            color: gray;
-            display: block;
-            margin-top: 2px;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
 </style>
 
 <div class="main-container">
     <div class="conversations-list">
         <div class="conversations-header">
             <div>Conversas</div>
-            <button class="add-button">+</button>
+            <button id="addButton" class="add-button">+</button>
         </div>
 
-        <!-- Carrega a lista de contatos -->
-        @await Html.PartialAsync("_ContactsList", Model.Contacts)
+        <div class="conversas">
+            <!-- Carrega a lista de contatos -->
+            @await Html.PartialAsync("_ContactsList", Model)
+        </div>
 
         <button id="btnLogout" class="logout-button">Logout</button>
     </div>
@@ -211,73 +204,190 @@
         <!-- Carrega área do chat -->
         @await Html.PartialAsync("_ChatArea", Model)
     </div>
+
+
+</div>
+
+<!-- Modal de Adicionar Usuário -->
+<div id="addUserModal" class="modal-overlay" style="display: none;">
+    <div class="modal custom-modal">
+        <h2 class="modal-title">Adicionar Usuário</h2>
+
+        <form asp-action="AddUser" asp-controller="Chat" method="post" class="modal-form">
+            @if (ViewBag.Error != null)
+            {
+                <div class="modal-alert">@ViewBag.Error</div>
+            }
+            <label for="Name">Nome:</label>
+            <input type="text" name="Name" class="modal-input" />
+
+            <label for="NumberId">Número ID:</label>
+            <input type="text" maxlength="8" name="NumberId" class="modal-input" required />
+            <input type="text" maxlength="8" name="MyNumberId" value="@Model.UserLogged.NumberId" style="display: none;" class="modal-input" required />
+
+            <div class="modal-actions">
+                <button type="submit" class="modal-save">Salvar</button>
+                <button type="button" onclick="closeModal()" class="modal-cancel">Cancelar</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
-    $(document).ready(function(){
-        $("#btnLogout").click(function(){
-             $.ajax({
-             url: "/Login/LogOut",
-             success: function (response) {
-                 window.location.href = response.redirectUrl;
+    $(document).ready(function () {
+        var shouldOpenModal = '@(ViewBag.OpenModal ?? false)' === 'True';
+
+        if (shouldOpenModal) {
+            $("#addUserModal").css("display", "flex");
+        }
+
+        $("#addButton").click(function () {
+            $("#addUserModal").css("display", "flex");
+        });
+
+        $(".modal-cancel").click(function () {
+            $("#addUserModal").css("display", "none");
+        });
+    });
+
+    $(document).ready(function () {
+        $("#btnLogout").click(function () {
+            $.ajax({
+                url: "/Login/LogOut",
+                success: function (response) {
+                    window.location.href = response.redirectUrl;
                 },
-             });
-         });
+            });
+        });
     });
 
     let webIdContact = "";
     let typingTimeout;
 
-    function selecionarContato(webId, myNumberId) {
-       $.ajax({
-           url: '/Chat/ContatoSelecionado',
-           type: 'POST',
-               contentType: 'application/json',
-           data: JSON.stringify({ WebId: webId, MyNumberId: myNumberId }),
-           success: function (html) {
-               webIdContact = webId;
-               $('.chat-container').html(html);
-               }
-       });
+    function selecionarContato(to, myNumberId) {
+        $.ajax({
+            url: '/Chat/ContatoSelecionado',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ WebId: to, MyNumberId: myNumberId }),
+            success: function (html) {
+                webIdContact = to;
+                $('.chat-container').html(html);
+            }
+        });
     }
 
-    
-
     // SignalR
-    let userLogged = @Html.Raw(Json.Serialize(Model.UserLogged.Name));
-    userLogged = userLogged + ";" + @Html.Raw(Json.Serialize(Model.UserLogged.WebId));
+        const contacts = @Html.Raw(Json.Serialize(Model.Contacts));
 
-     const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/chatHub?userName=" + encodeURIComponent(userLogged))
+    let from = @Html.Raw(Json.Serialize(Model.UserLogged.Name));
+    from = from + ";" + @Html.Raw(Json.Serialize(Model.UserLogged.WebId));
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub?userName=" + encodeURIComponent(from))
+        .withAutomaticReconnect()
         .build();
 
-    connection.start()
-        .then(function () {            
-            $(document).on('input', '#chatInput', function() {
-                const userSelected = webIdContact;
+    connection.onreconnecting((error) => {
+        console.warn("Tentando reconectar...", error);
+    });
 
-                connection.invoke("Typing", userLogged, userSelected).catch(function (err) {
+    connection.onreconnected((connectionId) => {
+        console.log("Reconectado com sucesso!", connectionId);
+    });
+
+    connection.start()
+        .then(function () {
+            $(document).on('input', '#chatInput', function () {
+                const to = webIdContact;
+
+                connection.invoke("Typing", from, to).catch(function (err) {
                     return console.error(err.toString());
                 });
             });
 
-        
-            connection.on("UserTyping", function(userSel) {
-                $("#typing-indicator").text("digitando...");
-                $("#typing-indicator-" + userSel).text("digitando...");
+        $(document).on('click', '#btnSendMessage', function() {
+                const to = webIdContact;
+                const message = $('#chatInput').val().trim();
+                if (message === "") {
+                        return;
+                }
 
-                clearTimeout(typingTimeout);
+                connection.invoke("SendMessage", from, to, message).catch(function (err) {
+                    return console.error(err.toString());
+                    });
 
-                typingTimeout = setTimeout(function() {
-                    $("#typing-indicator").text("");
-                    $("#typing-indicator-" + userSel).text("");
-                  }, 2000);
+                const chatMessages = $("#chatMessages");
+                    chatMessages.append("<div class='message sent'>" + message + "</div>");
+                chatMessages.scrollTop(chatMessages[0].scrollHeight);
+                $("#chatInput").val("");
+
+                SendMessageToController(to, message);
+                });
+
+                connection.on("ReceiveMessage", function (to, message) {
+
+                    if (to == webIdContact)
+                    {
+                        const chatMessages = $("#chatMessages");
+                        chatMessages.append("<div class='message received'>" + message + "</div>");
+                        chatMessages.scrollTop(chatMessages[0].scrollHeight);
+                        $("#chatInput").val("");
+                    }
+                    else
+                    {
+                         const contato = contacts.find(c => c.WebId === to);
+
+                         if (!contato)
+                         {
+                             $.ajax({
+                                 url: '/Chat/ContatoDesconhecido',
+                                 type: 'GET',
+                                 success: function (html) {
+                                     $('.conversas').html(html);
+                                 }
+                             });
+                         }
+                    }
+                });
+
+                connection.on("UserTyping", function(to) {
+                    $("#typing-indicator-"+ to).text("digitando...");
+
+                    if (to == webIdContact)
+                    {
+                        $("#typing-chatArea-" + to).text("digitando...");
+                    }
+                    clearTimeout(typingTimeout);
+
+                    typingTimeout = setTimeout(function() {
+                        $("#typing-indicator-"+to).text("");
+                        $("#typing-chatArea-" + to).text("");
+                      }, 2000);
+                });
+
+
+
+            })
+            .catch(function (err) {
+                return console.error(err.toString());
             });
 
-        })
-        .catch(function (err) {
-            return console.error(err.toString());
-        });
+
+        function SendMessageToController(to, message)
+        {
+            var fromWebId = from.split(";")[1];
+            const datetime = new Date().toISOString();
+
+             $.ajax({
+               url: '/Chat/SalvarMensagem',
+               type: 'POST',
+               data: { WIDFrom: fromWebId, WIDTo: to, message : message, datetime : datetime},
+               success: function (html) {
+                   console.log(html);
+               }
+           });
+        }
 </script>

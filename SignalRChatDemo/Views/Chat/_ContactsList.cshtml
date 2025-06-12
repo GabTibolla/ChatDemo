@@ -19,9 +19,9 @@
         gap: 12px;
     }
 
-    .conversation-item:hover {
-        background-color: rgba(255,255,255,0.1);
-    }
+        .conversation-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
 
     .avatar {
         width: 42px;
@@ -37,6 +37,40 @@
         color: white;
     }
 
+    .unread-message {
+        font-size: 12px;
+        width: 15px;
+        height: 15px;
+        border-radius: 100%;
+        background-color: #c4b5fd;
+        flex-shrink: 0;
+        margin-left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .message-hour-contact {
+        font-size: 12px;
+        color: gray;
+        padding-bottom: 10px;
+        bottom: 5px;
+        right: 10px;
+    }
+
+    .typing-indicator {
+        font-size: 12px;
+        color: gray;
+        margin-top: 2px;
+    }
+
+    .last-message {
+        font-size: 13px;
+        color: gray;
+        margin-top: 2px;
+    }
+
 </style>
 
 <div class="conversations-content">
@@ -49,7 +83,13 @@
 
                 <div style="display: flex; flex-direction: column;">
                     <div class="conversation-text">@(user.Name ?? user.NumberId)</div>
-                    <div id="typing-indicator-@user.WebId" class="typing-indicator" style="font-size: 12px; color: gray; margin-top: 2px;"></div>
+                    <div id="typing-indicator-@user.WebId" class="typing-indicator"></div>
+                    <div id="last-message-@user.WebId" class="last-message">Text de ultima mensagem</div>
+                </div>
+
+                <div style="margin-left: auto">
+                    <div id="message-hour-@user.WebId" class="message-hour-contact">@(user.LastMessageDate.HasValue ? user.LastMessageDate.Value.ToString("HH:mm") : "")</div>
+                    <div id="unread-message-@user.WebId" style="display: flex;" class="unread-message">3</div>
                 </div>
             </div>
 

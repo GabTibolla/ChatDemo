@@ -1,77 +1,5 @@
 ﻿@model ChatDemo.Data.Chat
 
-<style>
-    .conversations-content {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        overflow-y: auto;
-    }
-
-    .conversation-item {
-        display: flex;
-        align-items: center;
-        padding: 15px 20px;
-        cursor: pointer;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        transition: background-color 0.2s;
-        gap: 12px;
-    }
-
-        .conversation-item:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-
-    .avatar {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        background-color: #c4b5fd;
-        flex-shrink: 0;
-    }
-
-    .conversation-text {
-        font-size: 16px;
-        font-weight: 500;
-        color: white;
-    }
-
-    .unread-message {
-        font-size: 12px;
-        width: 15px;
-        height: 15px;
-        border-radius: 100%;
-        background-color: #c4b5fd;
-        flex-shrink: 0;
-        margin-left: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-    }
-
-    .message-hour-contact {
-        font-size: 12px;
-        color: gray;
-        padding-bottom: 10px;
-        bottom: 5px;
-        right: 10px;
-    }
-
-    .typing-indicator {
-        font-size: 12px;
-        color: gray;
-        margin-top: 2px;
-    }
-
-    .last-message {
-        font-size: 13px;
-        color: gray;
-        margin-top: 2px;
-    }
-
-</style>
 
 <div class="conversations-content">
     @if (Model.Contacts != null && Model.Contacts.Any())
@@ -84,7 +12,7 @@
                 <div style="display: flex; flex-direction: column;">
                     <div class="conversation-text">@(user.Name ?? user.NumberId)</div>
                     <div id="typing-indicator-@user.WebId" class="typing-indicator"></div>
-                    <div id="last-message-@user.WebId" class="last-message">Text de ultima mensagem</div>
+                    <div id="last-message-@user.WebId" class="last-message">@((user.LastMessage?.Text?.Length > 24 ? user.LastMessage.Text?.Substring(0, 20) + "..." : user.LastMessage?.Text) ?? "")</div>
                 </div>
 
                 <div style="margin-left: auto">

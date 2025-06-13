@@ -25,13 +25,13 @@ namespace SignalRChatDemo.ChatHub
             return userConnections.FirstOrDefault(x => x.Value.Split(";")[1] == userId).Key;
         }
 
-        public async Task SendMessage(string userLogged, string userSelected, string message)
+        public async Task SendMessage(string userLogged, string userSelected, string message, string time)
         {
             var connectionId = GetConnectionIdByUser(userSelected);
 
             if (connectionId != null)
             {
-                await Clients.Client(connectionId).SendAsync("ReceiveMessage", userLogged.Split(";")[1], message);
+                await Clients.Client(connectionId).SendAsync("ReceiveMessage", userLogged.Split(";")[1], message, time);
             }
         }
 

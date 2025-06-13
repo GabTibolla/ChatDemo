@@ -11,6 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\js\Chat\js\ajax-functions.js" />
+    <None Include="wwwroot\js\Chat\js\chat-main.js" />
+    <None Include="wwwroot\js\Chat\js\signalr-events.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ChatDemo.DAO.SQLite\ChatDemo.DAO.SQLite.csproj" />
     <ProjectReference Include="..\ChatDemo.DAO\ChatDemo.DAO.csproj" />
     <ProjectReference Include="..\ChatDemo.Data\ChatDemo.Data.csproj" />

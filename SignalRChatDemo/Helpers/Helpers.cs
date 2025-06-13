@@ -199,17 +199,23 @@ namespace ChatDemo.Helpers
 
             using (SHA256 sha256Hash = SHA256.Create())
             {
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(baseString));
+                byte[] hashBytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(baseString));
 
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < 4; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2").ToUpper());
-                }
+                string letras1 = ((char)('A' + hashBytes[0] % 26)).ToString() +
+                                 ((char)('A' + hashBytes[1] % 26)).ToString();
 
-                return builder.ToString();
+                string numeros = (hashBytes[2] % 10).ToString() +
+                                 (hashBytes[3] % 10).ToString() +
+                                 (hashBytes[4] % 10).ToString() +
+                                 (hashBytes[5] % 10).ToString();
+
+                string letras2 = ((char)('A' + hashBytes[6] % 26)).ToString();
+                string numeros2 = (hashBytes[7] % 10).ToString();
+
+                return $"{letras1}-{numeros}-{letras2}{numeros2}";
             }
         }
+
 
         #endregion
     }

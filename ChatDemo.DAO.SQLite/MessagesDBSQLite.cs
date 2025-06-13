@@ -13,7 +13,7 @@ namespace ChatDemo.DAO.SQLite
         {
         }
 
-        public override bool AddMessage(ChatDemo.Data.Messages message)
+        public override bool AddMessage(ChatDemo.Data.Message message)
         {
             var connection = CriarConnection();
             Microsoft.Data.Sqlite.SqliteTransaction? transaction = null;
@@ -25,24 +25,33 @@ namespace ChatDemo.DAO.SQLite
                 transaction = connection.BeginTransaction();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("INSERT INTO Messages (Message, DateTime, FromNumberId, ToNumberId) ");
-                sql.Append("VALUES (@Message, @Datetime, @FromNumberId, @ToNumberId) ");
+                sql.Append("INSERT INTO Messages (Text, DateTime, FromNumberId, ToNumberId) ");
+                sql.Append("VALUES (@text, @Datetime, @FromNumberId, @ToNumberId); ");
+                sql.Append("SELECT last_insert_rowid();");
 
                 var command = connection.CreateCommand();
                 command.CommandText = sql.ToString();
-                command.Parameters.AddWithValue("@Message", message.Message);
+                command.Parameters.AddWithValue("@text", message.Text);
                 command.Parameters.AddWithValue("@Datetime", message.Datetime);
                 command.Parameters.AddWithValue("@FromNumberId", message.FromNumberId);
                 command.Parameters.AddWithValue("@ToNumberId", message.ToNumberId);
 
-                retorno = command.ExecuteNonQuery() > 0;
-                transaction.Commit();
 
-                // Verifica se é necessário criar o contato em segundo plano
-                System.Threading.Tasks.Task.Run(() =>
+                int idMessage = Convert.ToInt32(command.ExecuteScalar());
+
+                if (idMessage > 0)
                 {
-                    CreateContact(message.FromNumberId, message.ToNumberId);
-                });
+                    retorno = true;
+
+                    // Verifica se é necessário criar o contato em segundo plano
+                    System.Threading.Tasks.Task.Run(() =>
+                    {
+                        message.Id = idMessage;
+                        CreateContact(message.FromNumberId, message.ToNumberId, message);
+                    });
+
+                    transaction.Commit();
+                }
 
             }
             catch (Exception)
@@ -61,7 +70,7 @@ namespace ChatDemo.DAO.SQLite
             return retorno;
         }
 
-        public override List<ChatDemo.Data.Messages>? GetMessagesByNumberId(string fromNumberId, string toNumberId)
+        public override List<ChatDemo.Data.Message>? GetMessagesByNumberId(string fromNumberId, string toNumberId)
         {
             var connection = CriarConnection();
 
@@ -70,7 +79,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Message, Datetime, FromNumberId, ToNumberId, Sent ");
+                sql.Append("SELECT Id, Text, Datetime, FromNumberId, ToNumberId ");
                 sql.Append("FROM Messages ");
                 sql.Append("WHERE ");
                 sql.Append(" (FromNumberId = @FromNumberId AND ToNumberId = @ToNumberId) ");
@@ -86,12 +95,12 @@ namespace ChatDemo.DAO.SQLite
 
                 Microsoft.Data.Sqlite.SqliteDataReader reader = command.ExecuteReader();
 
-                List<ChatDemo.Data.Messages>? messages = new List<Data.Messages>();
+                List<ChatDemo.Data.Message>? messages = new List<Data.Message>();
                 while (reader.Read())
                 {
-                    var message = new ChatDemo.Data.Messages();
+                    var message = new ChatDemo.Data.Message();
                     message.Id = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
-                    message.Message = reader.IsDBNull(1) ? null : reader.GetString(1);
+                    message.Text = reader.IsDBNull(1) ? null : reader.GetString(1);
                     message.Datetime = reader.IsDBNull(2) ? DateTime.MinValue : reader.GetDateTime(2);
                     message.FromNumberId = reader.IsDBNull(3) ? null : reader.GetString(3);
                     message.ToNumberId = reader.IsDBNull(4) ? null : reader.GetString(4);
@@ -112,7 +121,7 @@ namespace ChatDemo.DAO.SQLite
             }
         }
 
-        protected override void CreateContact(string fromNumberId, string toNumberId)
+        protected override void CreateContact(string fromNumberId, string toNumberId, ChatDemo.Data.Message message)
         {
             var connection = CriarConnection();
 
@@ -139,13 +148,29 @@ namespace ChatDemo.DAO.SQLite
                             Name = null,
                             NumberId = user.NumberId,
                             MyNumberId = toNumberId,
-                            WebId = user.WebId
+                            WebId = user.WebId,
+                            LastMessageId = message.Id,
+                            LastMessageDate = message.Datetime,
+                            LastMessage = message,
                         };
 
                         contactDB.CreateContact(contact);
                     }
-
+                    else
+                    {
+                        // Erro, pois o contato nem existe, logo não vai atualizar nada e nem ninguém.
+                        return;
+                    }
                 }
+
+                // Atualiza os dois contatos com a mesma mensagem e dataHora
+                contact.LastMessageId = message.Id;
+                contact.LastMessageDate = message.Datetime;
+                contact.LastMessage = message;
+
+                connection.Open();
+                contactDB.UpdateContact(contact);
+
             }
             catch (Exception)
             {

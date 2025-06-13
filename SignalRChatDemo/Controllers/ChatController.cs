@@ -99,7 +99,7 @@ namespace SignalRChatDemo.Controllers
             {
                 // Se não achou o contato, manda uma área de chat vazia
                 chat.SelectedContact = null;
-                chat.Messages = new List<ChatDemo.Data.Messages>();
+                chat.Messages = new List<ChatDemo.Data.Message>();
                 return PartialView("_ChatArea", chat);
             }
 
@@ -108,7 +108,7 @@ namespace SignalRChatDemo.Controllers
 
             if (messages == null)
             {
-                messages = new List<ChatDemo.Data.Messages>();
+                messages = new List<ChatDemo.Data.Message>();
             }
 
             messages = messages.OrderBy(p => p.Datetime).ToList();
@@ -120,9 +120,9 @@ namespace SignalRChatDemo.Controllers
         }
 
         [HttpGet]
-        public IActionResult ContatoDesconhecido()
+        public IActionResult AtualizaListaDeContatos()
         {
-            System.Threading.Thread.Sleep(1500);
+            System.Threading.Thread.Sleep(1000);
             var chat = MyModel();
             return PartialView("_ContactsList", chat);
         }
@@ -149,9 +149,9 @@ namespace SignalRChatDemo.Controllers
             }
 
             ChatDemo.DAO.MessagesDB messagesDB = ChatDemo.Helpers.Helpers.CreateDBMessages(_configServices);
-            ChatDemo.Data.Messages newMessage = new ChatDemo.Data.Messages
+            ChatDemo.Data.Message newMessage = new ChatDemo.Data.Message
             {
-                Message = message,
+                Text = message,
                 Datetime = datetime.ToLocalTime(),
                 FromNumberId = userFrom.NumberId,
                 ToNumberId = userTo.NumberId
@@ -188,7 +188,7 @@ namespace SignalRChatDemo.Controllers
             chat.Contacts = listContacts;
             chat.SelectedContact = null;
             chat.UserLogged = user;
-            chat.Messages = new List<ChatDemo.Data.Messages>();
+            chat.Messages = new List<ChatDemo.Data.Message>();
 
             return chat;
         }

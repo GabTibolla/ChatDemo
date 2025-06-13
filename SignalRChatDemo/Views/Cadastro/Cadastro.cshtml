@@ -87,7 +87,7 @@
             @ViewBag.Mensagem
         </div>
     }
-    <form method="post" action="/Cadastro/Register">
+    <form method="post" autocomplete="off" action="/Cadastro/Register">
         <div class="form-group">
             <label for="name">Nome</label>
             <input type="text" id="name" name="name" value="@Model?.Name" placeholder="Digite o nome completo">

@@ -81,7 +81,7 @@
 
 <div class="login-container">
     <div class="login-header">Login</div>
-    <form method="post" action="/Login/DoLogin">
+    <form method="post" autocomplete="off" action="/Login/DoLogin">
         <div class="form-group">
             <label for="cpf">CPF</label>
             <input type="text" id="cpf" name="cpf" value="@Model?.Cpf" placeholder="Digite seu CPF">

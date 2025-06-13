@@ -27,7 +27,10 @@ namespace ChatDemo.DAO
         {
             throw new NotImplementedException();
         }
-
+        public virtual bool UpdateContact(ChatDemo.Data.Contacts contact)
+        {
+            throw new NotImplementedException();
+        }
         public virtual List<ChatDemo.Data.Contacts>? GetAllContacts(string myNumberId)
         {
             throw new NotImplementedException();
@@ -40,7 +43,6 @@ namespace ChatDemo.DAO
         {
             throw new NotImplementedException();
         }
-
         public virtual ChatDemo.Data.Contacts GetContactByWebIdAndNumberId(string webId, string myNumberId)
         {
             throw new NotImplementedException();

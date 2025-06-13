@@ -16,17 +16,17 @@
             return (ChatDemo.DAO.MessagesDB?)instance;
         }
 
-        public virtual bool AddMessage(ChatDemo.Data.Messages message)
+        public virtual bool AddMessage(ChatDemo.Data.Message message)
         {
             throw new NotImplementedException();
         }
         
-        protected virtual void CreateContact(string fromNumberId, string toNumberId)
+        protected virtual void CreateContact(string fromNumberId, string toNumberId, ChatDemo.Data.Message message)
         {
             throw new NotImplementedException();
         }
 
-        public virtual List<ChatDemo.Data.Messages>? GetMessagesByNumberId(string fromNumberId, string toNumberId)
+        public virtual List<ChatDemo.Data.Message>? GetMessagesByNumberId(string fromNumberId, string toNumberId)
         {
             throw new NotImplementedException();
         }

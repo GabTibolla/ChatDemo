@@ -251,11 +251,10 @@ namespace ChatDemo.DAO.SQLite
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Messages (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Message TEXT,
+                    Text TEXT,
                     DateTime TEXT,
                     FromNumberId TEXT,
-                    ToNumberId INTEGER,
-                    Sent INTEGER
+                    ToNumberId INTEGER
                 )";
             command.ExecuteNonQuery();
             connection.Close();
@@ -275,7 +274,8 @@ namespace ChatDemo.DAO.SQLite
                     MyNumberId TEXT NOT NULL,
                     LastMessageId INTEGER,
                     LastMessageDate TEXT,
-                    WebId TEXT NOT NULL
+                    WebId TEXT NOT NULL,
+                    JsonEvent TEXT DEFAULT NULL
                 )";
             command.ExecuteNonQuery();
             connection.Close();

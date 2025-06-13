@@ -22,16 +22,71 @@ namespace ChatDemo.DAO.SQLite
                 transaction = connection.BeginTransaction();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("INSERT INTO Contacts (Name, NumberId, MyNumberId, WebId) ");
-                sql.Append("VALUES (@Name, @NumberId, @MyNumberId, @WebId) ");
+                sql.Append("INSERT INTO Contacts (Name, NumberId, MyNumberId, WebId, LastMessageId, LastMessageDate, JsonEvent) ");
+                sql.Append("VALUES (@Name, @NumberId, @MyNumberId, @WebId, @LastMessageId, @LastMessageDate, @JsonEvent) ");
 
                 var command = connection.CreateCommand();
                 command.CommandText = sql.ToString();
+
+                string? json = null;
+                if(contact.LastMessage != null)
+                    json = System.Text.Json.JsonSerializer.Serialize(contact.LastMessage);
 
                 command.Parameters.AddWithValue("@Name", contact.Name ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@NumberId", contact.NumberId);
                 command.Parameters.AddWithValue("@MyNumberId", contact.MyNumberId);
                 command.Parameters.AddWithValue("@WebId", contact.WebId);
+                command.Parameters.AddWithValue("@LastMessageId", contact.LastMessageId ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@LastMessageDate", contact.LastMessageDate ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@JsonEvent", json ?? (object)DBNull.Value);
+                retorno = command.ExecuteNonQuery() > 0;
+
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
+
+                throw;
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return retorno;
+        }
+
+        public override bool UpdateContact(ChatDemo.Data.Contacts contact)
+        {
+            var connection = CriarConnection();
+            Microsoft.Data.Sqlite.SqliteTransaction? transaction = null;
+            bool retorno = false;
+
+            try
+            {
+                connection.Open();
+                transaction = connection.BeginTransaction();
+
+                StringBuilder sql = new StringBuilder();
+                sql.Append("UPDATE CONTACTS SET LastMessageId = @LastMessageId, LastMessageDate = @LastMessageDate, JsonEvent = @JsonEvent ");
+                sql.Append("WHERE (NumberId = @NumberId AND MyNumberId = @MyNumberId) || (NumberId = @MyNumberId AND MyNumberId = @NumberId); ");
+
+                var command = connection.CreateCommand();
+                command.CommandText = sql.ToString();
+
+                string? json = null;
+                if(contact.LastMessage != null) 
+                    json = System.Text.Json.JsonSerializer.Serialize(contact.LastMessage);
+
+                command.Parameters.AddWithValue("@LastMessageId", contact.LastMessageId);
+                command.Parameters.AddWithValue("@LastMessageDate", contact.LastMessageDate);
+                command.Parameters.AddWithValue("@NumberId", contact.NumberId);
+                command.Parameters.AddWithValue("@MyNumberId", contact.MyNumberId);
+                command.Parameters.AddWithValue("@JsonEvent", json ?? (object)DBNull.Value);
                 retorno = command.ExecuteNonQuery() > 0;
 
                 transaction.Commit();
@@ -61,7 +116,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate, WebId ");
+                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate, WebId, JsonEvent ");
                 sql.Append("FROM Contacts ");
                 sql.Append("WHERE MyNumberId = @myNumberId ");
 
@@ -82,6 +137,13 @@ namespace ChatDemo.DAO.SQLite
                     contact.LastMessageId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
                     contact.LastMessageDate = reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5));
                     contact.WebId = reader.IsDBNull(6) ? null : reader.GetString(6);
+
+                    // Se a última mensagem for nula, não atribui
+                    if (!reader.IsDBNull(7))
+                    {
+                        string json = reader.GetString(7);
+                        contact.LastMessage = System.Text.Json.JsonSerializer.Deserialize<ChatDemo.Data.Message>(json);
+                    }
 
                     contacts.Add(contact);
                 }
@@ -107,7 +169,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate, WebId ");
+                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate, WebId, JsonEvent ");
                 sql.Append("FROM Contacts ");
                 sql.Append("WHERE NumberId = @NumberId AND MyNumberId = @myNumberId ");
 
@@ -130,6 +192,14 @@ namespace ChatDemo.DAO.SQLite
                     contact.LastMessageId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
                     contact.LastMessageDate = reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5));
                     contact.WebId = reader.IsDBNull(6) ? null : reader.GetString(6);
+
+                    // Se a última mensagem for nula, não atribui
+                    if (!reader.IsDBNull(7))
+                    {
+                        string json = reader.GetString(7);
+                        contact.LastMessage = System.Text.Json.JsonSerializer.Deserialize<ChatDemo.Data.Message>(json);
+                    }
+
                 }
 
                 return contact;
@@ -153,7 +223,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate, WebId ");
+                sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate, WebId, JsonEvent ");
                 sql.Append("FROM Contacts ");
                 sql.Append("WHERE WebId = @webId AND MyNumberId = @myNumberId ");
 
@@ -175,6 +245,13 @@ namespace ChatDemo.DAO.SQLite
                     contact.LastMessageId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
                     contact.LastMessageDate = reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5));
                     contact.WebId = reader.IsDBNull(6) ? null : reader.GetString(6);
+
+                    // Se a última mensagem for nula, não atribui
+                    if (!reader.IsDBNull(7))
+                    {
+                        string json = reader.GetString(7);
+                        contact.LastMessage = System.Text.Json.JsonSerializer.Deserialize<ChatDemo.Data.Message>(json);
+                    }
                 }
 
                 return contact;

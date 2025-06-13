@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace ChatDemo.Data
 {
-    public class Messages
+    public class Message
     {
         public int Id { get; set; }
-        public string? Message { get; set; }
+        public string? Text { get; set; }
         public DateTime Datetime { get; set; }
         public string FromNumberId { get; set; }
         public string ToNumberId { get; set; }

@@ -1,0 +1,122 @@
+﻿.chat-header {
+    background-color: #6a11cb;
+    color: white;
+    padding: 20px;
+    font-size: 24px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+.typing-indicator {
+    font-size: 12px;
+    color: gray;
+    display: block;
+    margin-top: 2px;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    background-color: #ece5dd;
+    font-size: 18px;
+}
+
+.avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: #c4b5fd;
+    flex-shrink: 0;
+}
+
+.message {
+    font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #111B21;
+    width: fit-content;
+    max-width: 60%;
+    border-radius: 12px;
+    clear: both;
+    padding-left: 10px;
+    padding-right: 50px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    position: relative;
+    margin-bottom: 4px;
+}
+
+    .message.sent + .message.received,
+    .message.received + .message.sent {
+        margin-top: 14px;
+    }
+
+    .message.sent {
+        background-color: #dcf8c6;
+        margin-left: auto;
+        text-align: left;
+    }
+
+    .message.received {
+        background-color: white;
+        margin-right: auto;
+        text-align: left;
+    }
+
+.message-hour {
+    font-size: 12px;
+    color: gray;
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+}
+
+.chat-input {
+    display: flex;
+    border-top: 1px solid #ccc;
+}
+
+    .chat-input input {
+        flex: 1;
+        border: none;
+        padding: 18px;
+        font-size: 18px;
+    }
+
+    .chat-input button {
+        background-color: #6a11cb;
+        color: white;
+        border: none;
+        padding: 0 30px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    .chat-input input:focus {
+        outline: none;
+    }
+
+    .chat-input button:active {
+        opacity: 0.85;
+    }
+
+#chatInput {
+    resize: none;
+    width: 100%;
+    font-size: 16px;
+    font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    line-height: 0.9;
+    box-sizing: border-box;
+}
+
+    #chatInput::placeholder {
+        color: #999;
+        opacity: 1;
+    }

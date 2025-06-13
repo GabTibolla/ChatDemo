@@ -18,14 +18,17 @@
             {
                 <div class="message sent">
                     @message.Text
-                    <div class=message-hour>@message.Datetime.ToString("HH:mm")</div>
+                    <div class="message-hour">
+                        @message.Datetime.ToString("HH:mm")
+                        <div class="status-message"></div>
+                    </div>
                 </div>
             }
             else
             {
                 <div class="message received">
                     @message.Text
-                    <div class=message-hour>@message.Datetime.ToString("HH:mm")</div>
+                    <div class="message-hour">@message.Datetime.ToString("HH:mm")</div>
                 </div>
             }
         }

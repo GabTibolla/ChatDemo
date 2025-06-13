@@ -213,6 +213,7 @@ a {
     color: white;
     margin-left: auto;
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .list-menu:focus {

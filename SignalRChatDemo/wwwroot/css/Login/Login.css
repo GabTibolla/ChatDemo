@@ -1,0 +1,73 @@
+﻿.login-container {
+    width: 500px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 50px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+    .login-container:hover {
+        transform: scale(1.01);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+    }
+
+.login-header {
+    font-size: 32px;
+    font-weight: 700;
+    color: #764ba2;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+    .form-group label {
+        display: block;
+        font-size: 15px;
+        color: #764ba2;
+        font-weight: 600;
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 16px;
+        font-size: 16px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 8px rgba(118, 75, 162, 0.5);
+        }
+
+.form-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+    .form-button button {
+        background-color: #764ba2;
+        color: white;
+        border: none;
+        padding: 16px 40px;
+        font-size: 18px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .form-button button:hover {
+            background-color: #5c3c9e;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+        }

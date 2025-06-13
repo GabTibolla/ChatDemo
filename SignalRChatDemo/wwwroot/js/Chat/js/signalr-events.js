@@ -55,7 +55,6 @@ function ReceiveMessage(connection, contacts) {
             const chatMessages = $("#chatMessages");
             chatMessages.append("<div class='message received'>" + "<div class='message-hour'>" + time + "</div>" + message + "</div>");
             chatMessages.scrollTop(chatMessages[0].scrollHeight);
-            $("#chatInput").val("");
         }
 
         AtualizarListaDeContatos();

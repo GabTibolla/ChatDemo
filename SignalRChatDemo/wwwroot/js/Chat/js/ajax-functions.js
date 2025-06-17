@@ -100,13 +100,22 @@ function AtualizarListaDeContatos() {
     });
 }
 
-function SendMessageToController(from, message, datetime) {
-    var fromWebId = from.split(";")[1];
+function SendStatusMessageToController(from, to) {
+    $.ajax({
+        url: '/Chat/AtualizaStatusMessage',
+        type: 'GET',
+        data: { WIDFrom: from, WIDTo: to },
+        success: function (html) {
+            // nao faz nada, ainda.
+        }
+    });
+}
 
+function SendMessageToController(from, message, datetime) {
     $.ajax({
         url: '/Chat/SalvarMensagem',
         type: 'POST',
-        data: { WIDFrom: fromWebId, WIDTo: globalIdContact, message: message, datetime: datetime },
+        data: { WIDFrom: from, WIDTo: globalIdContact, message: message, datetime: datetime },
         success: function (html) {
             console.log(html);
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChatDemo.Data;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
@@ -70,6 +71,45 @@ namespace ChatDemo.DAO.SQLite
             return retorno;
         }
 
+        public override bool UpdateStatusMessageToRead(ChatDemo.Data.User userFrom, ChatDemo.Data.User userTo)
+        {
+            var connection = CriarConnection();
+            Microsoft.Data.Sqlite.SqliteTransaction? transaction = null;
+            bool retorno = false;
+
+            try
+            {
+                connection.Open();
+                transaction = connection.BeginTransaction();
+
+                StringBuilder sql = new StringBuilder();
+                sql.Append("UPDATE Messages SET Status = 2 ");
+                sql.Append("WHERE FromNumberId = @FromNumberId AND ToNumberId = @ToNumberId; ");
+
+                var command = connection.CreateCommand();
+                command.CommandText = sql.ToString();
+                command.Parameters.AddWithValue("@FromNumberId", userTo.NumberId);
+                command.Parameters.AddWithValue("@ToNumberId", userFrom.NumberId);
+
+                retorno = command.ExecuteNonQuery() > 0;
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
+                throw;
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return retorno;
+        }
+
         public override List<ChatDemo.Data.Message>? GetMessagesByNumberId(string fromNumberId, string toNumberId)
         {
             var connection = CriarConnection();
@@ -79,7 +119,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Text, Datetime, FromNumberId, ToNumberId ");
+                sql.Append("SELECT Id, Text, Datetime, FromNumberId, ToNumberId, Status ");
                 sql.Append("FROM Messages ");
                 sql.Append("WHERE ");
                 sql.Append(" (FromNumberId = @FromNumberId AND ToNumberId = @ToNumberId) ");
@@ -104,6 +144,7 @@ namespace ChatDemo.DAO.SQLite
                     message.Datetime = reader.IsDBNull(2) ? DateTime.MinValue : reader.GetDateTime(2);
                     message.FromNumberId = reader.IsDBNull(3) ? null : reader.GetString(3);
                     message.ToNumberId = reader.IsDBNull(4) ? null : reader.GetString(4);
+                    message.Status = (ChatDemo.Data.Message.StatusMessage) reader.GetInt32(5);
                     message.Sent = message.FromNumberId == fromNumberId ? true : false;
 
                     messages.Add(message);

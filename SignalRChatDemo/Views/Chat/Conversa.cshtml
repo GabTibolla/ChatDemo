@@ -72,13 +72,12 @@
 
 <script defer src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-<script defer src="~/js/Chat/js/ajax-functions.js"></script>
 <script defer src="~/js/Chat/js/signalr-connection.js"></script>
+<script defer src="~/js/Chat/js/ajax-functions.js"></script>
 
 <script defer>
     const contacts = @Html.Raw(Json.Serialize(Model.Contacts));
-    let from = @Html.Raw(Json.Serialize(Model.UserLogged.Name));
-    from = from + ";" + @Html.Raw(Json.Serialize(Model.UserLogged.WebId));
+    let from = @Html.Raw(Json.Serialize(Model.UserLogged.WebId));
 
     let openModal = @(ViewBag.OpenModal == true ? "true" : "false");
     if (openModal){

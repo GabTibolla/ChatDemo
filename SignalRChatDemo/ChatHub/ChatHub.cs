@@ -22,16 +22,25 @@ namespace SignalRChatDemo.ChatHub
 
         private string? GetConnectionIdByUser(string userId)
         {
-            return userConnections.FirstOrDefault(x => x.Value.Split(";")[1] == userId).Key;
+            return userConnections.FirstOrDefault(x => x.Value == userId).Key;
         }
 
-        public async Task SendMessage(string userLogged, string userSelected, string message, string time)
+        public async Task SendStatusMessage(string userSelected, string guidMessage)
+        {
+            var connectionId = GetConnectionIdByUser(userSelected);
+            if (connectionId != null)
+            {
+                await Clients.Client(connectionId).SendAsync("ReceiveStatusMessage", userSelected, guidMessage);
+            }
+        }
+
+        public async Task SendMessage(string userLogged, string userSelected, string message, string guidMessage, string time)
         {
             var connectionId = GetConnectionIdByUser(userSelected);
 
             if (connectionId != null)
             {
-                await Clients.Client(connectionId).SendAsync("ReceiveMessage", userLogged.Split(";")[1], message, time);
+                await Clients.Client(connectionId).SendAsync("ReceiveMessage", userLogged, message, guidMessage, time);
             }
         }
 
@@ -41,7 +50,7 @@ namespace SignalRChatDemo.ChatHub
 
             if (connectionId != null)
             {
-                await Clients.Client(connectionId).SendAsync("UserTyping", userLogged.Split(";")[1]);
+                await Clients.Client(connectionId).SendAsync("UserTyping", userLogged);
             }
         }
     }

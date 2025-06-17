@@ -20,7 +20,7 @@
                     @message.Text
                     <div class="message-hour">
                         @message.Datetime.ToString("HH:mm")
-                        <div class="status-message"></div>
+                        <div id="statusMessage" class="status-message @(message.Status == ChatDemo.Data.Message.StatusMessage.Read ? "read" : "") "></div>
                     </div>
                 </div>
             }

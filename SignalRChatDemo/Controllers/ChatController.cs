@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ChatDemo.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Text;
 using System.Text.Json;
 
@@ -91,7 +93,7 @@ namespace SignalRChatDemo.Controllers
         [HttpPost]
         public IActionResult ContatoSelecionado([FromBody] ChatDemo.Data.Contacts contato)
         {
-            ChatDemo.Data.Chat chat = new ChatDemo.Data.Chat();
+            ChatDemo.Data.Chat chat = MyModel();
             var contactsDb = ChatDemo.Helpers.Helpers.CreateDBContacts(_configServices);
 
             ChatDemo.Data.Contacts contact = contactsDb.GetContactByWebIdAndNumberId(contato.WebId, contato.MyNumberId);
@@ -102,6 +104,9 @@ namespace SignalRChatDemo.Controllers
                 chat.Messages = new List<ChatDemo.Data.Message>();
                 return PartialView("_ChatArea", chat);
             }
+
+            // Atualiza mensagens não lidas
+            AtualizaStatusMessage(chat.UserLogged.WebId, contact.WebId);
 
             var messagesDB = ChatDemo.Helpers.Helpers.CreateDBMessages(_configServices);
             var messages = messagesDB.GetMessagesByNumberId(contact.MyNumberId, contact.NumberId);
@@ -117,6 +122,38 @@ namespace SignalRChatDemo.Controllers
             chat.Messages = messages;
 
             return PartialView("_ChatArea", chat);
+        }
+
+        [HttpGet]
+        public IActionResult AtualizaStatusMessage(string WIDFrom, string WIDTo)
+        {
+            if (string.IsNullOrEmpty(WIDFrom) || string.IsNullOrEmpty(WIDTo))
+            {
+                return StatusCode(500, "Mensagem não enviada.");
+            }
+
+            ChatDemo.DAO.UsersDB usersDB = ChatDemo.Helpers.Helpers.CreateDBUsers(_configServices);
+            ChatDemo.Data.User? userFrom = usersDB.GetUserByWebId(WIDFrom);
+            if (userFrom == null)
+            {
+                return StatusCode(500, "Usuário não encontrado.");
+            }
+
+            ChatDemo.Data.User? userTo = usersDB.GetUserByWebId(WIDTo);
+            if (userTo == null)
+            {
+                return StatusCode(500, "Usuário não encontrado.");
+            }
+
+            ChatDemo.DAO.MessagesDB messagesDB = ChatDemo.Helpers.Helpers.CreateDBMessages(_configServices);
+            bool messageSaved = messagesDB.UpdateStatusMessageToRead(userFrom, userTo);
+
+            if (!messageSaved)
+            {
+                return StatusCode(500, "Mensagens não atualizadas.");
+            }
+
+            return Ok("Mensagem salva com sucesso.");
         }
 
         [HttpGet]

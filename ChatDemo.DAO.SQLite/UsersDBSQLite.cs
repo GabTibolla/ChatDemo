@@ -254,7 +254,8 @@ namespace ChatDemo.DAO.SQLite
                     Text TEXT,
                     DateTime TEXT,
                     FromNumberId TEXT,
-                    ToNumberId INTEGER
+                    ToNumberId INTEGER,
+                    Status INTEGER DEFAULT 0
                 )";
             command.ExecuteNonQuery();
             connection.Close();

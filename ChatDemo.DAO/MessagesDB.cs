@@ -20,7 +20,12 @@
         {
             throw new NotImplementedException();
         }
-        
+
+        public virtual bool UpdateStatusMessageToRead(ChatDemo.Data.User userFrom, ChatDemo.Data.User userTo)
+        {
+            throw new NotImplementedException();
+        }
+
         protected virtual void CreateContact(string fromNumberId, string toNumberId, ChatDemo.Data.Message message)
         {
             throw new NotImplementedException();

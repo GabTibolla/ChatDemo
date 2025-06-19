@@ -92,7 +92,7 @@ namespace SignalRChatDemo.Controllers
             ChatDemo.Data.Chat chat = MyModel();
             string conversationId = ChatDemo.Business.Helper.GerarConversationId(payload.OwnerNumberId, payload.ContactNumberId);
 
-            var conversationDB = ChatDemo.Business.Helper.CreateDBConversations(_configServices);            
+            var conversationDB = ChatDemo.Business.Helper.CreateDBConversations(_configServices);
             ChatDemo.Data.Conversation? conversation = conversationDB.GetConversation(conversationId);
 
             if (conversation == null)
@@ -135,20 +135,10 @@ namespace SignalRChatDemo.Controllers
             return PartialView("_ChatArea", chat);
         }
 
+        [HttpPost]
         public IActionResult ReturnMessagesUnread([FromBody] ChatDemo.Data.Conversation payload)
         {
-            string conversationId = ChatDemo.Business.Helper.GerarConversationId(payload.OwnerNumberId, payload.ContactNumberId);
-
-            var messagesDB = ChatDemo.Business.Helper.CreateDBMessages(_configServices);
-            var messages = messagesDB.GetMessages(conversationId);
-
-            if (messages == null)
-            {
-                messages = new List<ChatDemo.Data.Message>();
-            }
-
-            messages = messages.OrderBy(p => p.Datetime).ToList();
-            messages = messages.Where(p => p.Status != ChatDemo.Data.Message.StatusMessage.Read).ToList();
+            var messages = GetUnreadMessages(payload.OwnerNumberId, payload.ContactNumberId);
 
             return new JsonResult(new { messages = messages });
         }
@@ -166,7 +156,7 @@ namespace SignalRChatDemo.Controllers
             // Gera o ConversationId
             string conversationId = ChatDemo.Business.Helper.GerarConversationId(OwnerNumberId, ContactNumberId);
 
-            bool messageSaved = messagesDB.UpdateStatusMessageToRead(conversationId);
+            bool messageSaved = messagesDB.UpdateStatusMessageToRead(conversationId, OwnerNumberId);
 
             if (!messageSaved)
             {
@@ -182,6 +172,22 @@ namespace SignalRChatDemo.Controllers
             System.Threading.Thread.Sleep(1000);
             var chat = MyModel();
             return PartialView("_ConversationList", chat);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateNotifierIcon(string ContactNumberId, string OwnerNumberId)
+        {
+            System.Threading.Thread.Sleep(500);
+            var messages = GetUnreadMessages(OwnerNumberId, ContactNumberId);
+
+            messages = messages.Where(p => p.SenderNumberId != OwnerNumberId).ToList();
+
+            ChatDemo.DAO.ContactsDB contactDB = ChatDemo.Business.Helper.CreateDBContacts(_configServices);
+            int unreadMessages = messages?.Count ?? 0;
+
+            // Atualiza
+            contactDB.UpdateUnreadMessages(unreadMessages, ContactNumberId, OwnerNumberId);
+            return Ok();
         }
 
         [HttpPost]
@@ -205,7 +211,7 @@ namespace SignalRChatDemo.Controllers
                 SenderNumberId = OwnerNumberId,
                 ConversationId = conversationId,
                 Status = ChatDemo.Data.Message.StatusMessage.Sent,
-                WebId= GuidMessage
+                WebId = GuidMessage
             };
 
             bool messageSaved = messagesDB.AddMessage(newMessage, ContactNumberId);
@@ -218,23 +224,41 @@ namespace SignalRChatDemo.Controllers
             return Ok("Mensagem salva com sucesso.");
         }
 
+        private List<ChatDemo.Data.Message> GetUnreadMessages(string OwnerNumberId, string ContactNumberId)
+        {
+            string conversationId = ChatDemo.Business.Helper.GerarConversationId(OwnerNumberId, ContactNumberId);
+
+            var messagesDB = ChatDemo.Business.Helper.CreateDBMessages(_configServices);
+            var messages = messagesDB.GetMessages(conversationId);
+
+            if (messages == null)
+            {
+                messages = new List<ChatDemo.Data.Message>();
+            }
+
+            messages = messages.OrderBy(p => p.Datetime).ToList();
+            messages = messages.Where(p => p.Status != ChatDemo.Data.Message.StatusMessage.Read).ToList();
+
+            return messages;
+        }
+
         private ChatDemo.Data.Chat MyModel()
         {
             string? userJson = User.FindFirst("User")?.Value;
             ChatDemo.Data.User? user = JsonSerializer.Deserialize<ChatDemo.Data.User>(userJson);
 
             var contactsDb = ChatDemo.Business.Helper.CreateDBContacts(_configServices);
-            var conversationsDB = ChatDemo.Business.Helper.CreateDBConversations(_configServices);
+
 
             // Buscando lista de conversas/contatos
             List<ChatDemo.Data.Contacts>? listContacts = contactsDb.GetContacts(user.NumberId);
 
             // Percorre a lista de contatos procurando se existe a conversa
-            List<ChatDemo.Data.Conversation>? listConversations = null;
+            List<ChatDemo.Data.Conversation>? listConversations = new List<ChatDemo.Data.Conversation>();
 
             if (listContacts != null && listContacts.Count > 0)
             {
-                listConversations = new  List<ChatDemo.Data.Conversation>();
+                var conversationsDB = ChatDemo.Business.Helper.CreateDBConversations(_configServices);
 
                 foreach (var i in listContacts)
                 {
@@ -248,12 +272,18 @@ namespace SignalRChatDemo.Controllers
                 }
             }
 
-
-            // Ordenando por última mensagem
-            if (listConversations != null && listConversations.Count() > 0)
+            if (listConversations != null && listConversations.Count > 0)
             {
-                listConversations = listConversations.OrderByDescending(p => p.LastMessage?.Datetime).ToList();
+                listContacts = listContacts
+                    .OrderByDescending(contact =>
+                    {
+                        var convId = ChatDemo.Business.Helper.GerarConversationId(contact.ContactNumberId, user.NumberId);
+                        var conv = listConversations.FirstOrDefault(c => c.Id == convId);
+                        return conv?.LastMessage?.Datetime;
+                    })
+                    .ToList();
             }
+
 
             ChatDemo.Data.Chat chat = new ChatDemo.Data.Chat();
             chat.Conversations = listConversations;

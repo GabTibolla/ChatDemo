@@ -186,7 +186,6 @@ namespace ChatDemo.DAO.SQLite
                 throw;
             }
         }
-
         public override bool UpdateConversation(ChatDemo.Data.Conversation conversation)
         {
             var connection = CriarConnection();

@@ -8,7 +8,6 @@ namespace ChatDemo.DAO.SQLite
         public ContactsDBSQLite(string connectionString) : base(connectionString)
         {
         }
-
         public override bool CreateContact(Contacts contact)
         {
             var connection = CriarConnection();
@@ -50,7 +49,47 @@ namespace ChatDemo.DAO.SQLite
 
             return retorno;
         }
+        public override bool UpdateUnreadMessages(int unreadMessages, string ContactNumberId, string OwnerNumberId)
+        {
+            var connection = CriarConnection();
+            Microsoft.Data.Sqlite.SqliteTransaction? transaction = null;
+            bool retorno = false;
 
+            try
+            {
+                connection.Open();
+                transaction = connection.BeginTransaction();
+
+                StringBuilder sql = new StringBuilder();
+                sql.Append("UPDATE Contacts SET UnreadMessages = @UnreadMessages ");
+                sql.Append("WHERE OwnerNumberId = @OwnerNumberId AND ContactNumberId = @ContactNumberId ");
+
+                var command = connection.CreateCommand();
+                command.CommandText = sql.ToString();
+
+                command.Parameters.AddWithValue("@UnreadMessages", unreadMessages > 0 ? unreadMessages : 0);
+                command.Parameters.AddWithValue("@OwnerNumberId", OwnerNumberId);
+                command.Parameters.AddWithValue("@ContactNumberId", ContactNumberId);
+                retorno = command.ExecuteNonQuery() > 0;
+
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
+
+                throw;
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return retorno;
+        }
         public override List<ChatDemo.Data.Contacts>? GetContacts(string OwnerNumberId)
         {
             var connection = CriarConnection();
@@ -59,7 +98,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Alias, OwnerNumberId, ContactNumberId ");
+                sql.Append("SELECT Id, Alias, OwnerNumberId, ContactNumberId, UnreadMessages ");
                 sql.Append("FROM Contacts ");
                 sql.Append("WHERE OwnerNumberId = @OwnerNumberId");
 
@@ -77,6 +116,7 @@ namespace ChatDemo.DAO.SQLite
                     contact.Alias = reader.IsDBNull(1) ? null : reader.GetString(1);
                     contact.OwnerNumberId = reader.IsDBNull(2) ? null : reader.GetString(2);
                     contact.ContactNumberId = reader.IsDBNull(3) ? null : reader.GetString(3);
+                    contact.UnreadMessages = reader.IsDBNull(4) ? null : reader.GetInt32(4);
 
                     contacts.Add(contact);
                 }
@@ -92,8 +132,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Close();
             }
         }
-
-        public override ChatDemo.Data.Contacts? GetContactByNumberIdAndMyNumberId(string ContactNumberId, string OwnerNumberId)
+        public override ChatDemo.Data.Contacts? GetContactByOwnerAndContactNumberId(string ContactNumberId, string OwnerNumberId)
         {
             var connection = CriarConnection();
 
@@ -102,7 +141,7 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Alias, OwnerNumberId, ContactNumberId ");
+                sql.Append("SELECT Id, Alias, OwnerNumberId, ContactNumberId, UnreadMessages ");
                 sql.Append("FROM Contacts ");
                 sql.Append("WHERE ContactNumberId = @ContactNumberId AND OwnerNumberId = @OwnerNumberId ");
 
@@ -122,6 +161,7 @@ namespace ChatDemo.DAO.SQLite
                     contact.Alias = reader.IsDBNull(1) ? null : reader.GetString(1);
                     contact.OwnerNumberId = reader.IsDBNull(2) ? null : reader.GetString(2);
                     contact.ContactNumberId = reader.IsDBNull(3) ? null : reader.GetString(3);
+                    contact.UnreadMessages = reader.IsDBNull(4) ? null : reader.GetInt32(4);
                 }
 
                 return contact;
@@ -135,59 +175,6 @@ namespace ChatDemo.DAO.SQLite
                 connection.Close();
             }
         }
-
-        //public override ChatDemo.Data.Contacts GetContactByWebIdAndNumberId(string webId, string myNumberId)
-        //{
-        //    var connection = CriarConnection();
-
-        //    try
-        //    {
-        //        connection.Open();
-
-        //        StringBuilder sql = new StringBuilder();
-        //        sql.Append("SELECT Id, Name, NumberId, MyNumberId, LastMessageId, LastMessageDate, WebId, JsonEvent ");
-        //        sql.Append("FROM Contacts ");
-        //        sql.Append("WHERE WebId = @webId AND MyNumberId = @myNumberId ");
-
-        //        var command = connection.CreateCommand();
-        //        command.CommandText = sql.ToString();
-
-        //        command.Parameters.AddWithValue("@webId", webId);
-        //        command.Parameters.AddWithValue("@myNumberId", myNumberId);
-        //        Microsoft.Data.Sqlite.SqliteDataReader reader = command.ExecuteReader();
-
-        //        ChatDemo.Data.Contacts? contact = null;
-        //        if (reader.Read())
-        //        {
-        //            contact = new ChatDemo.Data.Contacts();
-        //            contact.Id = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
-        //            contact.Name = reader.IsDBNull(1) ? null : reader.GetString(1);
-        //            contact.NumberId = reader.IsDBNull(2) ? null : reader.GetString(2);
-        //            contact.MyNumberId = reader.IsDBNull(3) ? null : reader.GetString(3);
-        //            contact.LastMessageId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
-        //            contact.LastMessageDate = reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5));
-        //            contact.WebIdContact = reader.IsDBNull(6) ? null : reader.GetString(6);
-
-        //            // Se a última mensagem for nula, não atribui
-        //            if (!reader.IsDBNull(7))
-        //            {
-        //                string json = reader.GetString(7);
-        //                contact.LastMessage = System.Text.Json.JsonSerializer.Deserialize<ChatDemo.Data.Message>(json);
-        //            }
-        //        }
-
-        //        return contact;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //    finally
-        //    {
-        //        connection.Close();
-        //    }
-        //}
-
         protected Microsoft.Data.Sqlite.SqliteConnection CriarConnection()
         {
             try

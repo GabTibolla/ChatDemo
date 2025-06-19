@@ -6,5 +6,6 @@
         public string? Alias { get; set; }
         public string? OwnerNumberId { get; set; }
         public string? ContactNumberId { get; set; }
+        public int? UnreadMessages { get; set; }
     }
 }

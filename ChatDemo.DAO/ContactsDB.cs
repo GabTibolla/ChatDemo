@@ -23,11 +23,15 @@
         {
             throw new NotImplementedException();
         }
+        public virtual bool UpdateUnreadMessages(int unreadMessages, string ContactNumberId, string OwnerNumberId)
+        {
+            throw new NotImplementedException();
+        }
         public virtual List<ChatDemo.Data.Contacts>? GetContacts(string OwnerNumberId)
         {
             throw new NotImplementedException();
         }
-        public virtual ChatDemo.Data.Contacts? GetContactByNumberIdAndMyNumberId(string numberId, string myNumberId)
+        public virtual ChatDemo.Data.Contacts? GetContactByOwnerAndContactNumberId(string ContactNumberId, string OwnerNumberId)
         {
             throw new NotImplementedException();
         }
@@ -35,7 +39,7 @@
         {
             throw new NotImplementedException();
         }
-        public virtual ChatDemo.Data.Contacts GetContactByWebIdAndNumberId(string webId, string myNumberId)
+        public virtual ChatDemo.Data.Contacts GetContactByWebIdAndNumberId(string webId, string OwnerNumberId)
         {
             throw new NotImplementedException();
         }

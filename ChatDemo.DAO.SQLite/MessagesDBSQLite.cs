@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using ChatDemo.Data;
+using System.Text;
 
 namespace ChatDemo.DAO.SQLite
 {
@@ -66,7 +67,7 @@ namespace ChatDemo.DAO.SQLite
             return retorno;
         }
 
-        public override bool UpdateStatusMessageToRead(string conversationId)
+        public override bool UpdateStatusMessageToRead(string conversationId, string SenderNumberId)
         {
             var connection = CriarConnection();
             Microsoft.Data.Sqlite.SqliteTransaction? transaction = null;
@@ -79,11 +80,12 @@ namespace ChatDemo.DAO.SQLite
 
                 StringBuilder sql = new StringBuilder();
                 sql.Append("UPDATE Messages SET Status = 2 ");
-                sql.Append("WHERE ConversationId = @ConversationId ");
+                sql.Append("WHERE ConversationId = @ConversationId AND SenderNumberId <> @SenderNumberId ");
 
                 var command = connection.CreateCommand();
                 command.CommandText = sql.ToString();
                 command.Parameters.AddWithValue("@ConversationId", conversationId);
+                command.Parameters.AddWithValue("@SenderNumberId", SenderNumberId);
 
                 retorno = command.ExecuteNonQuery() > 0;
                 transaction.Commit();
@@ -163,7 +165,7 @@ namespace ChatDemo.DAO.SQLite
                 var contactDB = new ChatDemo.DAO.SQLite.ContactsDBSQLite(_connectionString);
 
                 // Verifica se o contato (você) já existe para o outro usuário (lógica inversa)
-                var contact = contactDB.GetContactByNumberIdAndMyNumberId(message.SenderNumberId, ContactNumberId);
+                var contact = contactDB.GetContactByOwnerAndContactNumberId(message.SenderNumberId, ContactNumberId);
 
                 // Se não existe, insere
                 if (contact == null)

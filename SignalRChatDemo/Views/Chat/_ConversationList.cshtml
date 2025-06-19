@@ -16,13 +16,26 @@
 
                 <div style="display: flex; flex-direction: column;">
                     <div class="conversation-text">@(contato?.Alias ?? contato.ContactNumberId)</div>
-                    <div id="typing-indicator-@idConversation" class="typing-indicator"></div>
-                    <div id="last-message-@idConversation" class="last-message">@((conversation?.LastMessage?.Text?.Length > 24 ? conversation.LastMessage.Text?.Substring(0, 20) + "..." : conversation?.LastMessage?.Text) ?? "")</div>
+                    <div id="typing-indicator-@contato.ContactNumberId" class="typing-indicator"></div>
+                    @if (conversation?.LastMessage?.SenderNumberId == Model?.User?.NumberId)
+                    {
+                        <div id="last-message-@contato.ContactNumberId" class="last-message">Você: @((conversation?.LastMessage?.Text?.Length > 15 ? conversation.LastMessage.Text?.Substring(0, 15) + "..." : conversation?.LastMessage?.Text) ?? "")</div>
+                    }
+                    else
+                    {
+                        <div id="last-message-@contato.ContactNumberId" class="last-message">@((conversation?.LastMessage?.Text?.Length > 20 ? conversation.LastMessage.Text?.Substring(0, 20) + "..." : conversation?.LastMessage?.Text) ?? "")</div>
+                    }
                 </div>
 
                 <div style="margin-left: auto">
-                    <div id="message-hour-@idConversation" class="message-hour-contact">@(conversation?.LastMessage?.Datetime != null ? conversation.LastMessage.Datetime.ToString("HH:mm") : "")</div>
-                    <div id="unread-message-@idConversation" style="display: flex;" class="unread-message">3</div>
+                    <div id="message-hour-@contato.ContactNumberId" class="message-hour-contact">@(conversation?.LastMessage?.Datetime != null ? conversation.LastMessage.Datetime.ToLocalTime().ToString("HH:mm") : "")</div>
+
+                    @if (contato.UnreadMessages > 0)
+                    {
+                        <div id="unread-message-@contato.ContactNumberId" style="display: @(contato.UnreadMessages > 0 ? "flex" : "none");" class="unread-message">
+                            @contato.UnreadMessages
+                        </div>
+                    }
                 </div>
             </div>
         }

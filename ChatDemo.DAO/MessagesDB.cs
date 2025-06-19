@@ -21,7 +21,7 @@
             throw new NotImplementedException();
         }
 
-        public virtual bool UpdateStatusMessageToRead(string conversationId)
+        public virtual bool UpdateStatusMessageToRead(string conversationId, string SenderNumberId)
         {
             throw new NotImplementedException();
         }

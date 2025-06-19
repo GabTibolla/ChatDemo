@@ -67,6 +67,10 @@ function ReceiveMessage(connection, OwnerNumberId, contacts) {
             // Atualizar a mensagem para "Lida"
             SendStatusMessage(connection, OwnerNumberId, Contact, GuidMessage);
         }
+        else {
+            // Aqui devo atualizar o contato com um item de mensagem não lida (notificação)
+            AtualizaIconeNovaMensagem(Contact, OwnerNumberId);
+        }
 
         AtualizarListaDeContatos();
     });

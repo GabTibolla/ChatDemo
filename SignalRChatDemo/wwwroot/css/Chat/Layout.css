@@ -252,3 +252,14 @@ a {
     background-color: #ede9fe;
     color: #4f46e5;
 }
+
+.status-message {
+    width: 5px;
+    height: 5px;
+    background-color: darkgrey;
+    border-radius: 100%;
+}
+
+    .status-message.read {
+        background-color: #3EAFB0;
+    }

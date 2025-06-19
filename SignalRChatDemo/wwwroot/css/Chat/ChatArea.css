@@ -78,17 +78,6 @@
     gap: 8px;
 }
 
-.status-message {
-    width: 5px;
-    height: 5px;
-    background-color: darkgrey;
-    border-radius: 100%;
-}
-
-.status-message.read{
-    background-color: #3EAFB0;
-}
-
 .chat-input {
     display: flex;
     border-top: 1px solid #ccc;

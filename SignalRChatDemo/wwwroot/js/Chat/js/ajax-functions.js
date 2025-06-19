@@ -1,5 +1,4 @@
-﻿function OpenModal(opened)
-{
+﻿function OpenModal(opened) {
     if (opened) {
         $("#addUserModal").css("display", "flex");
     } else {
@@ -85,10 +84,17 @@ function SelectConversation(ContactNumberId, OwnerNumberId) {
         data: JSON.stringify({ ContactNumberId: ContactNumberId, OwnerNumberId: OwnerNumberId }),
         success: function (html) {
             currentContact = ContactNumberId;
-            $('.chat-container').html(html);        
+            $('.chat-container').html(html);
+            $('#chatInput').focus();
+
             AtivarScrollChatArea();
 
             MarkMessagesToRead(ContactNumberId, OwnerNumberId);
+
+            AtualizaIconeNovaMensagem(ContactNumberId, OwnerNumberId);
+            setTimeout(function () {
+                AtualizarListaDeContatos();
+            }, 1000);
         }
     });
 }
@@ -104,9 +110,20 @@ function MarkMessagesToRead(ContactNumberId, OwnerNumberId) {
 
             if (resposta.messages.length > 0) {
                 resposta.messages.forEach(item => {
-                    SendStatusMessage(connection, OwnerNumberId, ContactNumberId,  item.webId);
+                    SendStatusMessage(connection, OwnerNumberId, ContactNumberId, item.webId);
                 });
             }
+        }
+    });
+}
+
+function AtualizaIconeNovaMensagem(Contact, OwnerNumberId) {
+    $.ajax({
+        url: '/Chat/UpdateNotifierIcon',
+        type: 'POST',
+        data: { ContactNumberId: Contact, OwnerNumberId: OwnerNumberId },
+        success: function (resposta) {
+
         }
     });
 }
@@ -117,6 +134,7 @@ function AtualizarListaDeContatos() {
         type: 'GET',
         success: function (html) {
             $('.conversas').html(html);
+
         }
     });
 }

@@ -248,6 +248,7 @@ namespace ChatDemo.DAO.SQLite
                     Alias TEXT,
                     OwnerNumberId TEXT NOT NULL,
                     ContactNumberId TEXT NOT NULL,
+                    UnreadMessages INTEGER,
                     UNIQUE(OwnerNumberId, ContactNumberId)
                 )";
             command.ExecuteNonQuery();

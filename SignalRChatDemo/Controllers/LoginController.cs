@@ -9,9 +9,9 @@ namespace ChatDemo.Controllers
     [AllowAnonymous]
     public class LoginController : Controller
     {
-        private readonly ChatDemo.Services.ConfigService _configService;
+        private readonly ChatDemo.Business.Interfaces.IConfigService _configService;
 
-        public LoginController(ChatDemo.Services.ConfigService configService)
+        public LoginController(ChatDemo.Business.Interfaces.IConfigService configService)
         {
             _configService = configService;
         }
@@ -33,10 +33,10 @@ namespace ChatDemo.Controllers
 
             #endregion
 
-            ChatDemo.DAO.UsersDB usersDB = ChatDemo.Helpers.Helpers.CreateDBUsers(_configService);
+            ChatDemo.DAO.UsersDB usersDB = ChatDemo.Business.Helper.CreateDBUsers(_configService);
             ChatDemo.Data.User? userExists = usersDB.GetUserByCpf(user.Cpf);
 
-            if (userExists == null || userExists.Password != ChatDemo.Helpers.Helpers.GerarHashSenha(user.Password))
+            if (userExists == null || userExists.Password != ChatDemo.Business.Helper.GerarHashSenha(user.Password))
             {
                 ViewBag.Mensagem = "Usuário ou senha inválidos.";
                 return View("Login", user);

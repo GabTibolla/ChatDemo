@@ -1,11 +1,11 @@
-﻿using ChatDemo.Services;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace ChatDemo.Helpers
+namespace ChatDemo.Business
 {
-    public static class Helpers
+    public class Helper
     {
+
         #region [ + Senha ]
         public static string GerarHashSenha(string senha)
         {
@@ -84,7 +84,7 @@ namespace ChatDemo.Helpers
                 }
             }
 
-            resto = (soma * 10) % 11;
+            resto = soma * 10 % 11;
 
             digito = resto;
             if (resto == 10 || resto == 11)
@@ -99,7 +99,7 @@ namespace ChatDemo.Helpers
 
         #region [ + DB ]
 
-        public static ChatDemo.DAO.UsersDB CreateDBUsers(ConfigService _configService)
+        public static DAO.UsersDB CreateDBUsers(Interfaces.IConfigService _configService)
         {
             string? connectionString = _configService.Get<string>("ConnectionString");
             string? className = _configService.Get<string>("Users:ClassName");
@@ -113,7 +113,7 @@ namespace ChatDemo.Helpers
                     throw new Exception("Configurações de banco de dados não encontradas.");
                 }
 
-                ChatDemo.DAO.UsersDB? DBAccess = ChatDemo.DAO.UsersDB.Create(className, projectName, connectionString);
+                DAO.UsersDB? DBAccess = DAO.UsersDB.Create(className, projectName, connectionString);
                 if (DBAccess == null)
                 {
                     throw new Exception("Erro ao criar instância do banco de dados.");
@@ -126,8 +126,33 @@ namespace ChatDemo.Helpers
                 throw;
             }
         }
+        public static DAO.ConversationsDB CreateDBConversations(Interfaces.IConfigService _configService)
+        {
+            string? connectionString = _configService.Get<string>("ConnectionString");
+            string? className = _configService.Get<string>("Conversations:ClassName");
+            string? projectName = _configService.Get<string>("Conversations:ProjectName");
 
-        public static ChatDemo.DAO.ContactsDB CreateDBContacts(ConfigService _configService)
+            try
+            {
+                if (string.IsNullOrEmpty(connectionString) || string.IsNullOrEmpty(className) || string.IsNullOrEmpty(projectName))
+                {
+                    throw new Exception("Configurações de banco de dados não encontradas.");
+                }
+
+                DAO.ConversationsDB? DBAccess = DAO.ConversationsDB.Create(className, projectName, connectionString);
+                if (DBAccess == null)
+                {
+                    throw new Exception("Erro ao criar instância do banco de dados.");
+                }
+
+                return DBAccess;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public static DAO.ContactsDB CreateDBContacts(Interfaces.IConfigService _configService)
         {
             string? connectionString = _configService.Get<string>("ConnectionString");
             string? className = _configService.Get<string>("Contacts:ClassName");
@@ -140,7 +165,7 @@ namespace ChatDemo.Helpers
                     throw new Exception("Configurações de banco de dados não encontradas.");
                 }
 
-                ChatDemo.DAO.ContactsDB? DBAccess = ChatDemo.DAO.ContactsDB.Create(className, projectName, connectionString);
+                DAO.ContactsDB? DBAccess = DAO.ContactsDB.Create(className, projectName, connectionString);
                 if (DBAccess == null)
                 {
                     throw new Exception("Erro ao criar instância do banco de dados.");
@@ -153,8 +178,7 @@ namespace ChatDemo.Helpers
                 throw;
             }
         }
-
-        public static ChatDemo.DAO.MessagesDB CreateDBMessages(ConfigService _configService)
+        public static DAO.MessagesDB CreateDBMessages(Interfaces.IConfigService _configService)
         {
             string? connectionString = _configService.Get<string>("ConnectionString");
             string? className = _configService.Get<string>("Messages:ClassName");
@@ -167,7 +191,7 @@ namespace ChatDemo.Helpers
                     throw new Exception("Configurações de banco de dados não encontradas.");
                 }
 
-                ChatDemo.DAO.MessagesDB? DBAccess = ChatDemo.DAO.MessagesDB.Create(className, projectName, connectionString);
+                DAO.MessagesDB? DBAccess = DAO.MessagesDB.Create(className, projectName, connectionString);
                 if (DBAccess == null)
                 {
                     throw new Exception("Erro ao criar instância do banco de dados.");
@@ -191,7 +215,20 @@ namespace ChatDemo.Helpers
 
         #endregion
 
-        #region [ + Identificador ]
+        #region [ + Identificador Conversation ]
+
+        public static string GerarConversationId(string NumberId1, string NumberId2)
+        {
+            var idsOrdenados = new[] { NumberId1, NumberId2 };
+            idsOrdenados = idsOrdenados.Select(id => id.Trim().ToUpperInvariant()).ToArray();
+            idsOrdenados = idsOrdenados.OrderBy(id => id).ToArray();
+
+            return $"{idsOrdenados[0]}-{idsOrdenados[1]}";
+        }
+
+        #endregion
+
+        #region [ + Identificador NumberId ]
 
         public static string GerarNumberId()
         {
@@ -218,7 +255,6 @@ namespace ChatDemo.Helpers
 
 
         #endregion
+
     }
-
-
 }

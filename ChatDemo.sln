@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatDemo.DAO.SQLite", "Chat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatDemo.Data", "ChatDemo.Data\ChatDemo.Data.csproj", "{1D9BF8F1-5279-4BB1-B67A-E58CAF6F3CDC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatDemo.Business", "ChatDemo.Business\ChatDemo.Business.csproj", "{D1F03E98-C512-4306-AC96-96D201D0D8CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{1D9BF8F1-5279-4BB1-B67A-E58CAF6F3CDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D9BF8F1-5279-4BB1-B67A-E58CAF6F3CDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D9BF8F1-5279-4BB1-B67A-E58CAF6F3CDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1F03E98-C512-4306-AC96-96D201D0D8CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1F03E98-C512-4306-AC96-96D201D0D8CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1F03E98-C512-4306-AC96-96D201D0D8CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1F03E98-C512-4306-AC96-96D201D0D8CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

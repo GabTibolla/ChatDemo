@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ChatDemo.Business\ChatDemo.Business.csproj" />
     <ProjectReference Include="..\ChatDemo.DAO.SQLite\ChatDemo.DAO.SQLite.csproj" />
     <ProjectReference Include="..\ChatDemo.DAO\ChatDemo.DAO.csproj" />
     <ProjectReference Include="..\ChatDemo.Data\ChatDemo.Data.csproj" />

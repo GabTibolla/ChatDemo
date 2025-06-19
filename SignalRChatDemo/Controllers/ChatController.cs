@@ -1,8 +1,5 @@
-﻿using ChatDemo.Data;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Text;
 using System.Text.Json;
 
 namespace SignalRChatDemo.Controllers
@@ -10,8 +7,8 @@ namespace SignalRChatDemo.Controllers
     [Authorize(AuthenticationSchemes = "CookieAuth")]
     public class ChatController : Controller
     {
-        private readonly ChatDemo.Services.ConfigService _configServices;
-        public ChatController(ChatDemo.Services.ConfigService configServices)
+        private readonly ChatDemo.Business.Interfaces.IConfigService _configServices;
+        public ChatController(ChatDemo.Business.Interfaces.IConfigService configServices)
         {
             _configServices = configServices;
         }
@@ -25,9 +22,9 @@ namespace SignalRChatDemo.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddUser(string name, string numberId, string myNumberId)
+        public IActionResult AddContact(string Alias, string ContactNumberId, string OwnerNumberId)
         {
-            if (string.IsNullOrEmpty(numberId) || string.IsNullOrEmpty(myNumberId))
+            if (string.IsNullOrEmpty(ContactNumberId) || string.IsNullOrEmpty(OwnerNumberId))
             {
                 ViewBag.OpenModal = true;
                 ViewBag.Error = "Todos os campos são obrigatórios.";
@@ -35,7 +32,7 @@ namespace SignalRChatDemo.Controllers
                 return View("Conversa", chat);
             }
 
-            if (numberId == myNumberId)
+            if (ContactNumberId == OwnerNumberId)
             {
                 ViewBag.OpenModal = true;
                 ViewBag.Error = "Não é possível adicionar com o mesmo NumberId.";
@@ -43,7 +40,7 @@ namespace SignalRChatDemo.Controllers
                 return View("Conversa", chat);
             }
 
-            var userDb = ChatDemo.Helpers.Helpers.CreateDBUsers(_configServices);
+            var userDb = ChatDemo.Business.Helper.CreateDBUsers(_configServices);
             if (userDb == null)
             {
                 ViewBag.OpenModal = true;
@@ -52,7 +49,7 @@ namespace SignalRChatDemo.Controllers
                 return View("Conversa", chat);
             }
 
-            ChatDemo.Data.User? user = userDb.GetUserByNumberId(numberId);
+            ChatDemo.Data.User? user = userDb.GetUserByNumberId(ContactNumberId);
             if (user == null)
             {
                 ViewBag.OpenModal = true;
@@ -61,7 +58,7 @@ namespace SignalRChatDemo.Controllers
                 return View("Conversa", chat);
             }
 
-            var contactDB = ChatDemo.Helpers.Helpers.CreateDBContacts(_configServices);
+            var contactDB = ChatDemo.Business.Helper.CreateDBContacts(_configServices);
             if (contactDB == null)
             {
                 ViewBag.OpenModal = true;
@@ -72,10 +69,9 @@ namespace SignalRChatDemo.Controllers
 
             var newContact = new ChatDemo.Data.Contacts
             {
-                Name = name,
-                NumberId = user.NumberId,
-                MyNumberId = myNumberId,
-                WebId = user.WebId
+                Alias = Alias,
+                ContactNumberId = user.NumberId,
+                OwnerNumberId = OwnerNumberId
             };
 
             bool created = contactDB.CreateContact(newContact);
@@ -91,25 +87,40 @@ namespace SignalRChatDemo.Controllers
         }
 
         [HttpPost]
-        public IActionResult ContatoSelecionado([FromBody] ChatDemo.Data.Contacts contato)
+        public IActionResult ConversationSelected([FromBody] ChatDemo.Data.Conversation payload)
         {
             ChatDemo.Data.Chat chat = MyModel();
-            var contactsDb = ChatDemo.Helpers.Helpers.CreateDBContacts(_configServices);
+            string conversationId = ChatDemo.Business.Helper.GerarConversationId(payload.OwnerNumberId, payload.ContactNumberId);
 
-            ChatDemo.Data.Contacts contact = contactsDb.GetContactByWebIdAndNumberId(contato.WebId, contato.MyNumberId);
-            if (contact == null)
+            var conversationDB = ChatDemo.Business.Helper.CreateDBConversations(_configServices);            
+            ChatDemo.Data.Conversation? conversation = conversationDB.GetConversation(conversationId);
+
+            if (conversation == null)
             {
-                // Se não achou o contato, manda uma área de chat vazia
-                chat.SelectedContact = null;
-                chat.Messages = new List<ChatDemo.Data.Message>();
-                return PartialView("_ChatArea", chat);
+                // Se não achou a conversa, cria uma conversa nova
+                conversation = new ChatDemo.Data.Conversation
+                {
+                    Id = conversationId,
+                    ContactNumberId = payload.ContactNumberId,
+                    OwnerNumberId = payload.OwnerNumberId,
+                    LastMessage = null
+                };
+
+                bool value = conversationDB.CreateConversation(conversation);
+                if (!value)
+                {
+                    // Retorna uma área vazia
+                    chat.CurrentConversation = null;
+                    chat.Messages = new List<ChatDemo.Data.Message>();
+                    return PartialView("_ChatArea", chat);
+                }
             }
 
-            // Atualiza mensagens não lidas
-            AtualizaStatusMessage(chat.UserLogged.WebId, contact.WebId);
+            conversation.OwnerNumberId = payload.OwnerNumberId;
+            conversation.ContactNumberId = payload.ContactNumberId;
 
-            var messagesDB = ChatDemo.Helpers.Helpers.CreateDBMessages(_configServices);
-            var messages = messagesDB.GetMessagesByNumberId(contact.MyNumberId, contact.NumberId);
+            var messagesDB = ChatDemo.Business.Helper.CreateDBMessages(_configServices);
+            var messages = messagesDB.GetMessages(conversationId);
 
             if (messages == null)
             {
@@ -118,35 +129,44 @@ namespace SignalRChatDemo.Controllers
 
             messages = messages.OrderBy(p => p.Datetime).ToList();
 
-            chat.SelectedContact = contact;
+            chat.CurrentConversation = conversation;
             chat.Messages = messages;
 
             return PartialView("_ChatArea", chat);
         }
 
-        [HttpGet]
-        public IActionResult AtualizaStatusMessage(string WIDFrom, string WIDTo)
+        public IActionResult ReturnMessagesUnread([FromBody] ChatDemo.Data.Conversation payload)
         {
-            if (string.IsNullOrEmpty(WIDFrom) || string.IsNullOrEmpty(WIDTo))
+            string conversationId = ChatDemo.Business.Helper.GerarConversationId(payload.OwnerNumberId, payload.ContactNumberId);
+
+            var messagesDB = ChatDemo.Business.Helper.CreateDBMessages(_configServices);
+            var messages = messagesDB.GetMessages(conversationId);
+
+            if (messages == null)
+            {
+                messages = new List<ChatDemo.Data.Message>();
+            }
+
+            messages = messages.OrderBy(p => p.Datetime).ToList();
+            messages = messages.Where(p => p.Status != ChatDemo.Data.Message.StatusMessage.Read).ToList();
+
+            return new JsonResult(new { messages = messages });
+        }
+
+        [HttpGet]
+        public IActionResult UpdateStatusMessage(string OwnerNumberId, string ContactNumberId)
+        {
+            if (string.IsNullOrEmpty(OwnerNumberId) || string.IsNullOrEmpty(ContactNumberId))
             {
                 return StatusCode(500, "Mensagem não enviada.");
             }
 
-            ChatDemo.DAO.UsersDB usersDB = ChatDemo.Helpers.Helpers.CreateDBUsers(_configServices);
-            ChatDemo.Data.User? userFrom = usersDB.GetUserByWebId(WIDFrom);
-            if (userFrom == null)
-            {
-                return StatusCode(500, "Usuário não encontrado.");
-            }
+            ChatDemo.DAO.MessagesDB messagesDB = ChatDemo.Business.Helper.CreateDBMessages(_configServices);
 
-            ChatDemo.Data.User? userTo = usersDB.GetUserByWebId(WIDTo);
-            if (userTo == null)
-            {
-                return StatusCode(500, "Usuário não encontrado.");
-            }
+            // Gera o ConversationId
+            string conversationId = ChatDemo.Business.Helper.GerarConversationId(OwnerNumberId, ContactNumberId);
 
-            ChatDemo.DAO.MessagesDB messagesDB = ChatDemo.Helpers.Helpers.CreateDBMessages(_configServices);
-            bool messageSaved = messagesDB.UpdateStatusMessageToRead(userFrom, userTo);
+            bool messageSaved = messagesDB.UpdateStatusMessageToRead(conversationId);
 
             if (!messageSaved)
             {
@@ -157,44 +177,38 @@ namespace SignalRChatDemo.Controllers
         }
 
         [HttpGet]
-        public IActionResult AtualizaListaDeContatos()
+        public IActionResult UpdateContactsList()
         {
             System.Threading.Thread.Sleep(1000);
             var chat = MyModel();
-            return PartialView("_ContactsList", chat);
+            return PartialView("_ConversationList", chat);
         }
 
         [HttpPost]
-        public IActionResult SalvarMensagem(string WIDFrom, string WIDTo, string message, DateTime datetime)
+        public IActionResult SaveMessage(string OwnerNumberId, string ContactNumberId, string Message, string GuidMessage, DateTime datetime)
         {
-            if (string.IsNullOrEmpty(WIDFrom) || string.IsNullOrEmpty(WIDTo) || string.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(OwnerNumberId) || string.IsNullOrEmpty(ContactNumberId) || string.IsNullOrEmpty(Message))
             {
                 return StatusCode(500, "Mensagem não enviada.");
             }
 
-            ChatDemo.DAO.UsersDB usersDB = ChatDemo.Helpers.Helpers.CreateDBUsers(_configServices);
-            ChatDemo.Data.User? userFrom = usersDB.GetUserByWebId(WIDFrom);
-            if (userFrom == null)
-            {
-                return StatusCode(500, "Usuário não encontrado.");
-            }
+            string conversationId = ChatDemo.Business.Helper.GerarConversationId(OwnerNumberId, ContactNumberId);
 
-            ChatDemo.Data.User? userTo = usersDB.GetUserByWebId(WIDTo);
-            if (userTo == null)
-            {
-                return StatusCode(500, "Usuário não encontrado.");
-            }
+            ChatDemo.DAO.UsersDB usersDB = ChatDemo.Business.Helper.CreateDBUsers(_configServices);
 
-            ChatDemo.DAO.MessagesDB messagesDB = ChatDemo.Helpers.Helpers.CreateDBMessages(_configServices);
+            ChatDemo.DAO.MessagesDB messagesDB = ChatDemo.Business.Helper.CreateDBMessages(_configServices);
+
             ChatDemo.Data.Message newMessage = new ChatDemo.Data.Message
             {
-                Text = message,
+                Text = Message,
                 Datetime = datetime.ToLocalTime(),
-                FromNumberId = userFrom.NumberId,
-                ToNumberId = userTo.NumberId
+                SenderNumberId = OwnerNumberId,
+                ConversationId = conversationId,
+                Status = ChatDemo.Data.Message.StatusMessage.Sent,
+                WebId= GuidMessage
             };
 
-            bool messageSaved = messagesDB.AddMessage(newMessage);
+            bool messageSaved = messagesDB.AddMessage(newMessage, ContactNumberId);
 
             if (!messageSaved)
             {
@@ -204,28 +218,50 @@ namespace SignalRChatDemo.Controllers
             return Ok("Mensagem salva com sucesso.");
         }
 
-        // Função para criar o modelo de chat
         private ChatDemo.Data.Chat MyModel()
         {
             string? userJson = User.FindFirst("User")?.Value;
             ChatDemo.Data.User? user = JsonSerializer.Deserialize<ChatDemo.Data.User>(userJson);
 
-            var contactsDb = ChatDemo.Helpers.Helpers.CreateDBContacts(_configServices);
+            var contactsDb = ChatDemo.Business.Helper.CreateDBContacts(_configServices);
+            var conversationsDB = ChatDemo.Business.Helper.CreateDBConversations(_configServices);
 
-            // Buscando lista de contatos
-            List<ChatDemo.Data.Contacts>? listContacts = contactsDb.GetAllContacts(user.NumberId);
+            // Buscando lista de conversas/contatos
+            List<ChatDemo.Data.Contacts>? listContacts = contactsDb.GetContacts(user.NumberId);
+
+            // Percorre a lista de contatos procurando se existe a conversa
+            List<ChatDemo.Data.Conversation>? listConversations = null;
+
+            if (listContacts != null && listContacts.Count > 0)
+            {
+                listConversations = new  List<ChatDemo.Data.Conversation>();
+
+                foreach (var i in listContacts)
+                {
+                    var conversationId = ChatDemo.Business.Helper.GerarConversationId(i.ContactNumberId, user.NumberId);
+                    var conversation = conversationsDB.GetConversation(conversationId);
+
+                    if (conversation != null)
+                    {
+                        listConversations.Add(conversation);
+                    }
+                }
+            }
+
 
             // Ordenando por última mensagem
-            if (listContacts != null && listContacts.Count() > 0)
+            if (listConversations != null && listConversations.Count() > 0)
             {
-                listContacts = listContacts.OrderByDescending(p => p.LastMessageDate).ToList();
+                listConversations = listConversations.OrderByDescending(p => p.LastMessage?.Datetime).ToList();
             }
 
             ChatDemo.Data.Chat chat = new ChatDemo.Data.Chat();
+            chat.Conversations = listConversations;
             chat.Contacts = listContacts;
-            chat.SelectedContact = null;
-            chat.UserLogged = user;
+            chat.User = user;
             chat.Messages = new List<ChatDemo.Data.Message>();
+
+            chat.CurrentConversation = null;
 
             return chat;
         }

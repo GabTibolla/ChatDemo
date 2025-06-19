@@ -1,10 +1,4 @@
-﻿using ChatDemo.Data;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace ChatDemo.DAO.SQLite
 {
@@ -14,7 +8,7 @@ namespace ChatDemo.DAO.SQLite
         {
         }
 
-        public override bool AddMessage(ChatDemo.Data.Message message)
+        public override bool AddMessage(ChatDemo.Data.Message message, string ContactNumberId)
         {
             var connection = CriarConnection();
             Microsoft.Data.Sqlite.SqliteTransaction? transaction = null;
@@ -26,17 +20,18 @@ namespace ChatDemo.DAO.SQLite
                 transaction = connection.BeginTransaction();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("INSERT INTO Messages (Text, DateTime, FromNumberId, ToNumberId) ");
-                sql.Append("VALUES (@text, @Datetime, @FromNumberId, @ToNumberId); ");
+                sql.Append("INSERT INTO Messages (ConversationId, SenderNumberId, WebId, Text, DateTime, Status) ");
+                sql.Append("VALUES (@ConversationId, @SenderNumberId, @WebId, @Text, @DateTime, @Status); ");
                 sql.Append("SELECT last_insert_rowid();");
 
                 var command = connection.CreateCommand();
                 command.CommandText = sql.ToString();
-                command.Parameters.AddWithValue("@text", message.Text);
-                command.Parameters.AddWithValue("@Datetime", message.Datetime);
-                command.Parameters.AddWithValue("@FromNumberId", message.FromNumberId);
-                command.Parameters.AddWithValue("@ToNumberId", message.ToNumberId);
-
+                command.Parameters.AddWithValue("@ConversationId", message.ConversationId);
+                command.Parameters.AddWithValue("@SenderNumberId", message.SenderNumberId);
+                command.Parameters.AddWithValue("@WebId", message.WebId);
+                command.Parameters.AddWithValue("@Text", message.Text);
+                command.Parameters.AddWithValue("@DateTime", message.Datetime);
+                command.Parameters.AddWithValue("@Status", (int) message.Status);
 
                 int idMessage = Convert.ToInt32(command.ExecuteScalar());
 
@@ -48,7 +43,7 @@ namespace ChatDemo.DAO.SQLite
                     System.Threading.Tasks.Task.Run(() =>
                     {
                         message.Id = idMessage;
-                        CreateContact(message.FromNumberId, message.ToNumberId, message);
+                        CreateContactAndUpdateConversation(message, ContactNumberId);
                     });
 
                     transaction.Commit();
@@ -71,7 +66,7 @@ namespace ChatDemo.DAO.SQLite
             return retorno;
         }
 
-        public override bool UpdateStatusMessageToRead(ChatDemo.Data.User userFrom, ChatDemo.Data.User userTo)
+        public override bool UpdateStatusMessageToRead(string conversationId)
         {
             var connection = CriarConnection();
             Microsoft.Data.Sqlite.SqliteTransaction? transaction = null;
@@ -84,12 +79,11 @@ namespace ChatDemo.DAO.SQLite
 
                 StringBuilder sql = new StringBuilder();
                 sql.Append("UPDATE Messages SET Status = 2 ");
-                sql.Append("WHERE FromNumberId = @FromNumberId AND ToNumberId = @ToNumberId; ");
+                sql.Append("WHERE ConversationId = @ConversationId ");
 
                 var command = connection.CreateCommand();
                 command.CommandText = sql.ToString();
-                command.Parameters.AddWithValue("@FromNumberId", userTo.NumberId);
-                command.Parameters.AddWithValue("@ToNumberId", userFrom.NumberId);
+                command.Parameters.AddWithValue("@ConversationId", conversationId);
 
                 retorno = command.ExecuteNonQuery() > 0;
                 transaction.Commit();
@@ -110,7 +104,7 @@ namespace ChatDemo.DAO.SQLite
             return retorno;
         }
 
-        public override List<ChatDemo.Data.Message>? GetMessagesByNumberId(string fromNumberId, string toNumberId)
+        public override List<ChatDemo.Data.Message>? GetMessages(string conversationId)
         {
             var connection = CriarConnection();
 
@@ -119,19 +113,16 @@ namespace ChatDemo.DAO.SQLite
                 connection.Open();
 
                 StringBuilder sql = new StringBuilder();
-                sql.Append("SELECT Id, Text, Datetime, FromNumberId, ToNumberId, Status ");
+                sql.Append("SELECT Id, SenderNumberId, Text, DateTime, Status, WebId ");
                 sql.Append("FROM Messages ");
-                sql.Append("WHERE ");
-                sql.Append(" (FromNumberId = @FromNumberId AND ToNumberId = @ToNumberId) ");
-                sql.Append(" OR (FromNumberId = @ToNumberId AND ToNumberId = @FromNumberId) ");
+                sql.Append("WHERE ConversationId = @ConversationId ");
                 sql.Append("ORDER BY Datetime ASC ");
                 sql.Append("LIMIT 250 ");
 
                 var command = connection.CreateCommand();
                 command.CommandText = sql.ToString();
 
-                command.Parameters.AddWithValue("@FromNumberId", fromNumberId);
-                command.Parameters.AddWithValue("@ToNumberId", toNumberId);
+                command.Parameters.AddWithValue("@ConversationId", conversationId);
 
                 Microsoft.Data.Sqlite.SqliteDataReader reader = command.ExecuteReader();
 
@@ -140,12 +131,12 @@ namespace ChatDemo.DAO.SQLite
                 {
                     var message = new ChatDemo.Data.Message();
                     message.Id = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
-                    message.Text = reader.IsDBNull(1) ? null : reader.GetString(1);
-                    message.Datetime = reader.IsDBNull(2) ? DateTime.MinValue : reader.GetDateTime(2);
-                    message.FromNumberId = reader.IsDBNull(3) ? null : reader.GetString(3);
-                    message.ToNumberId = reader.IsDBNull(4) ? null : reader.GetString(4);
-                    message.Status = (ChatDemo.Data.Message.StatusMessage) reader.GetInt32(5);
-                    message.Sent = message.FromNumberId == fromNumberId ? true : false;
+                    message.SenderNumberId = reader.IsDBNull(1) ? null : reader.GetString(1);
+                    message.Text = reader.IsDBNull(2) ? null : reader.GetString(2);
+                    message.Datetime = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
+                    message.Status = (ChatDemo.Data.Message.StatusMessage) reader.GetInt32(4);
+                    message.WebId = reader.IsDBNull(5) ? null : reader.GetString(5);
+                    message.ConversationId = conversationId;
 
                     messages.Add(message);
                 }
@@ -162,7 +153,7 @@ namespace ChatDemo.DAO.SQLite
             }
         }
 
-        protected override void CreateContact(string fromNumberId, string toNumberId, ChatDemo.Data.Message message)
+        protected override void CreateContactAndUpdateConversation(ChatDemo.Data.Message message, string ContactNumberId)
         {
             var connection = CriarConnection();
 
@@ -171,8 +162,8 @@ namespace ChatDemo.DAO.SQLite
                 // Cria instanciaDB de contato
                 var contactDB = new ChatDemo.DAO.SQLite.ContactsDBSQLite(_connectionString);
 
-                // Verifica se o contato (você) já existe para o outro usuário
-                var contact = contactDB.GetContactByNumberIdAndMyNumberId(fromNumberId, toNumberId);
+                // Verifica se o contato (você) já existe para o outro usuário (lógica inversa)
+                var contact = contactDB.GetContactByNumberIdAndMyNumberId(message.SenderNumberId, ContactNumberId);
 
                 // Se não existe, insere
                 if (contact == null)
@@ -180,38 +171,31 @@ namespace ChatDemo.DAO.SQLite
                     connection.Open();
 
                     var userDB = new ChatDemo.DAO.SQLite.UsersDBSQLite(_connectionString);
-                    var user = userDB.GetUserByNumberId(fromNumberId);
+                    var user = userDB.GetUserByNumberId(message.SenderNumberId);
 
                     if (user != null)
                     {
                         contact = new ChatDemo.Data.Contacts
                         {
-                            Name = null,
-                            NumberId = user.NumberId,
-                            MyNumberId = toNumberId,
-                            WebId = user.WebId,
-                            LastMessageId = message.Id,
-                            LastMessageDate = message.Datetime,
-                            LastMessage = message,
+                            Alias = null,
+                            ContactNumberId = user.NumberId,
+                            OwnerNumberId = ContactNumberId, // (Agora o contato é o dono)
                         };
 
                         contactDB.CreateContact(contact);
                     }
-                    else
-                    {
-                        // Erro, pois o contato nem existe, logo não vai atualizar nada e nem ninguém.
-                        return;
-                    }
                 }
 
-                // Atualiza os dois contatos com a mesma mensagem e dataHora
-                contact.LastMessageId = message.Id;
-                contact.LastMessageDate = message.Datetime;
-                contact.LastMessage = message;
+                // Atualiza a conversa com o contato
+                ChatDemo.Data.Conversation? conversation = null;
+                var conversationDB = new ChatDemo.DAO.SQLite.ConversationDBSQLite(_connectionString);
 
-                connection.Open();
-                contactDB.UpdateContact(contact);
-
+                conversation = conversationDB.GetConversation(message.ConversationId);
+                if (conversation != null)
+                {
+                    conversation.LastMessage = message;
+                    conversationDB.UpdateConversation(conversation);
+                }
             }
             catch (Exception)
             {

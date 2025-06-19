@@ -1,0 +1,31 @@
+﻿@model ChatDemo.Data.Chat
+
+
+<div class="conversations-content">
+    @* Exibe os contatos sem conversa *@
+    @if (Model.Contacts != null && Model.Contacts.Any())
+    {
+        foreach (var contato in Model.Contacts)
+        {
+            var idConversation = ChatDemo.Business.Helper.GerarConversationId(contato.OwnerNumberId, contato.ContactNumberId);
+
+            ChatDemo.Data.Conversation? conversation = Model.Conversations?.FirstOrDefault(p => p.Id == idConversation);
+
+            <div class="conversation-item" onclick="SelectConversation('@contato.ContactNumberId', '@contato.OwnerNumberId')">
+                <div class="avatar"></div>
+
+                <div style="display: flex; flex-direction: column;">
+                    <div class="conversation-text">@(contato?.Alias ?? contato.ContactNumberId)</div>
+                    <div id="typing-indicator-@idConversation" class="typing-indicator"></div>
+                    <div id="last-message-@idConversation" class="last-message">@((conversation?.LastMessage?.Text?.Length > 24 ? conversation.LastMessage.Text?.Substring(0, 20) + "..." : conversation?.LastMessage?.Text) ?? "")</div>
+                </div>
+
+                <div style="margin-left: auto">
+                    <div id="message-hour-@idConversation" class="message-hour-contact">@(conversation?.LastMessage?.Datetime != null ? conversation.LastMessage.Datetime.ToString("HH:mm") : "")</div>
+                    <div id="unread-message-@idConversation" style="display: flex;" class="unread-message">3</div>
+                </div>
+            </div>
+        }
+    }
+
+</div>

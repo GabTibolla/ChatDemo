@@ -1,24 +1,24 @@
 ﻿
-function SetupEvents(connection, from, contacts, typingTimeout, sendMessageFunc) {
+function SetupEvents(connection, OwnerNumberId, listContacts, typingTimeout, sendMessageFunc) {
     // Emits
-    SendTyping(connection, from);
-    SendMessage(connection, from);
+    SendTyping(connection, OwnerNumberId);
+    SendMessage(connection, OwnerNumberId);
 
     // Receives
-    ReceiveMessage(connection, from, contacts);
+    ReceiveMessage(connection, OwnerNumberId, listContacts);
     ReceiveStatusMessage(connection);
     ReceiveTyping(connection, typingTimeout);
 }
 
-function SendTyping(connection, from) {
+function SendTyping(connection, OwnerNumberId) {
     $(document).on('input', '#chatInput', function () {
-        connection.invoke("Typing", from, globalIdContact).catch(function (err) {
+        connection.invoke("Typing", OwnerNumberId, currentContact).catch(function (err) {
             return console.error(err.toString());
         });
     });
 }
 
-function SendMessage(connection, from) {
+function SendMessage(connection, OwnerNumberId) {
     $(document).on('click', '#btnSendMessage', function () {
         const message = $('#chatInput').val().trim();
         if (message === "") {
@@ -33,7 +33,7 @@ function SendMessage(connection, from) {
         const time = `${hours}:${minutes}`;
 
         let guidMessage = crypto.randomUUID();
-        connection.invoke("SendMessage", from, globalIdContact, message, guidMessage, time).catch(function (err) {
+        connection.invoke("SendMessage", OwnerNumberId, currentContact, message, guidMessage, time).catch(function (err) {
             return console.error(err.toString());
         });
 
@@ -42,30 +42,30 @@ function SendMessage(connection, from) {
         chatMessages.scrollTop(chatMessages[0].scrollHeight);
         $("#chatInput").val("");
 
-        SendMessageToController(from, message, datetime);
+        SendMessageToController(OwnerNumberId, message, guidMessage, datetime);
         AtualizarListaDeContatos();
     });
 }
 
-function SendStatusMessage(connection, from, to, guidMessage) {
-    connection.invoke("SendStatusMessage", to, guidMessage).catch(function (err) {
+function SendStatusMessage(connection, OwnerNumberId, Contact, GuidMessage) {
+    connection.invoke("SendStatusMessage", Contact, GuidMessage).catch(function (err) {
         return console.error(err.toString());
     });
 
     // envia pro controller que leu a mensagem
-    SendStatusMessageToController(from, to);
+    SendStatusMessageToController(OwnerNumberId, Contact);
 }
 
-function ReceiveMessage(connection, from, contacts) {
-    connection.on("ReceiveMessage", function (to, message, guidMessage, time) {
+function ReceiveMessage(connection, OwnerNumberId, contacts) {
+    connection.on("ReceiveMessage", function (Contact, Message, GuidMessage, time) {
 
-        if (to == globalIdContact) {
+        if (Contact == currentContact) {
             const chatMessages = $("#chatMessages");
-            chatMessages.append("<div class='message received'>" + "<div class='message-hour'>" + time + "</div>" + message + "</div>");
+            chatMessages.append("<div class='message received'>" + "<div class='message-hour'>" + time + "</div>" + Message + "</div>");
             chatMessages.scrollTop(chatMessages[0].scrollHeight);
 
             // Atualizar a mensagem para "Lida"
-            SendStatusMessage(connection, from, to, guidMessage);
+            SendStatusMessage(connection, OwnerNumberId, Contact, GuidMessage);
         }
 
         AtualizarListaDeContatos();
@@ -74,30 +74,31 @@ function ReceiveMessage(connection, from, contacts) {
 
 function ReceiveStatusMessage(connection)
 {
-    connection.on("ReceiveStatusMessage", function (me, guidMessage) {
+    connection.on("ReceiveStatusMessage", function (GuidMessage) {
 
-        var idItem = $("#statusMessage-" + guidMessage);
+        var idItem = $("#statusMessage-" + GuidMessage);
         // Muda cor do css status-message
         idItem.removeClass("read").addClass("read");
     });
 }
 
 function ReceiveTyping(connection, typingTimeout) {
-    connection.on("UserTyping", function (to) {
-        $("#typing-indicator-" + to).text("digitando...");
+    connection.on("UserTyping", function (Contact) {
+        $("#typing-indicator-" + Contact).text("digitando...");
 
-        $("#last-message-" + to).css("display", "none");
+        $("#last-message-" + Contact).css("display", "none");
 
-        if (to == globalIdContact) {
-            $("#typing-chatArea-" + to).text("digitando...");
+        if (Contact == currentContact) {
+            $("#typing-chatArea-" + Contact).text("digitando...");
         }
+
         clearTimeout(typingTimeout);
 
         typingTimeout = setTimeout(function () {
-            $("#typing-indicator-" + to).text("");
-            $("#typing-chatArea-" + to).text("");
+            $("#typing-indicator-" + Contact).text("");
+            $("#typing-chatArea-" + Contact).text("");
 
-            $("#last-message-" + to).css("display", "flex");
+            $("#last-message-" + Contact).css("display", "flex");
         }, 700);
     });
 }

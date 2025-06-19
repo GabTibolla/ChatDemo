@@ -71,28 +71,49 @@ $(document).on('keypress', '#chatInput', function (e) {
 
 function AtivarScrollChatArea() {
     let $mensagens = $('#chatMessages');
-    $mensagens.scrollTop($mensagens[0].scrollHeight);
+
+    if ($mensagens.length > 0) {
+        $mensagens.scrollTop($mensagens[0].scrollHeight);
+    }
 }
 
-function selecionarContato(to, myNumberId) {
+function SelectConversation(ContactNumberId, OwnerNumberId) {
     $.ajax({
-        url: '/Chat/ContatoSelecionado',
+        url: '/Chat/ConversationSelected',
         type: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({ WebId: to, MyNumberId: myNumberId }),
+        data: JSON.stringify({ ContactNumberId: ContactNumberId, OwnerNumberId: OwnerNumberId }),
         success: function (html) {
-            globalIdContact = to;
-           
-            $('.chat-container').html(html);
-
+            currentContact = ContactNumberId;
+            $('.chat-container').html(html);        
             AtivarScrollChatArea();
+
+            MarkMessagesToRead(ContactNumberId, OwnerNumberId);
+        }
+    });
+}
+
+function MarkMessagesToRead(ContactNumberId, OwnerNumberId) {
+    $.ajax({
+        url: '/Chat/ReturnMessagesUnread',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ ContactNumberId: ContactNumberId, OwnerNumberId: OwnerNumberId }),
+        success: function (resposta) {
+            console.log(resposta);
+
+            if (resposta.messages.length > 0) {
+                resposta.messages.forEach(item => {
+                    SendStatusMessage(connection, OwnerNumberId, ContactNumberId,  item.webId);
+                });
+            }
         }
     });
 }
 
 function AtualizarListaDeContatos() {
     $.ajax({
-        url: '/Chat/AtualizaListaDeContatos',
+        url: '/Chat/UpdateContactsList',
         type: 'GET',
         success: function (html) {
             $('.conversas').html(html);
@@ -100,24 +121,24 @@ function AtualizarListaDeContatos() {
     });
 }
 
-function SendStatusMessageToController(from, to) {
+function SendMessageToController(OwnerNumberId, message, guidMessage, datetime) {
     $.ajax({
-        url: '/Chat/AtualizaStatusMessage',
-        type: 'GET',
-        data: { WIDFrom: from, WIDTo: to },
+        url: '/Chat/SaveMessage',
+        type: 'POST',
+        data: { OwnerNumberId: OwnerNumberId, ContactNumberId: currentContact, Message: message, GuidMessage: guidMessage, datetime: datetime },
         success: function (html) {
-            // nao faz nada, ainda.
+            console.log(html);
         }
     });
 }
 
-function SendMessageToController(from, message, datetime) {
+function SendStatusMessageToController(OwnerNumberId, ContactNumberId) {
     $.ajax({
-        url: '/Chat/SalvarMensagem',
-        type: 'POST',
-        data: { WIDFrom: from, WIDTo: globalIdContact, message: message, datetime: datetime },
+        url: '/Chat/UpdateStatusMessage',
+        type: 'GET',
+        data: { OwnerNumberId: OwnerNumberId, ContactNumberId: ContactNumberId },
         success: function (html) {
-            console.log(html);
+            // nao faz nada, ainda.
         }
     });
 }

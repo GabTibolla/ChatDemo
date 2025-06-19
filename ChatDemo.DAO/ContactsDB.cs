@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ChatDemo.DAO
+﻿namespace ChatDemo.DAO
 {
     public class ContactsDB
     {
@@ -14,7 +8,6 @@ namespace ChatDemo.DAO
         {
             _connectionString = connectionString;
         }
-
         public static ChatDemo.DAO.ContactsDB? Create(string className, string projectName, string connectionString)
         {
             var type = Type.GetType($"{className}, {projectName}", true);
@@ -22,7 +15,6 @@ namespace ChatDemo.DAO
 
             return (ChatDemo.DAO.ContactsDB?)instance;
         }
-
         public virtual bool CreateContact(ChatDemo.Data.Contacts contact)
         {
             throw new NotImplementedException();
@@ -31,7 +23,7 @@ namespace ChatDemo.DAO
         {
             throw new NotImplementedException();
         }
-        public virtual List<ChatDemo.Data.Contacts>? GetAllContacts(string myNumberId)
+        public virtual List<ChatDemo.Data.Contacts>? GetContacts(string OwnerNumberId)
         {
             throw new NotImplementedException();
         }

@@ -19,15 +19,15 @@
         </div>
 
         <div class="conversas">
-            <!-- Carrega a lista de contatos -->
-            @await Html.PartialAsync("_ContactsList", Model)
+            <!-- Carrega a lista de conversas -->
+            @await Html.PartialAsync("_ConversationList", Model)
         </div>
 
         <div class="card">
             <div class="avatar"></div>
             <div class="info">
-                <div class="person">@Model.UserLogged.Name.Split(" ").First()</div>
-                <div class="number-id">NID: @Model.UserLogged.NumberId</div>
+                <div class="person">@Model.User?.Name?.Split(" ").First()</div>
+                <div class="number-id">NID: @Model.User?.NumberId</div>
             </div>
 
             <div class="menu-dropdown" id="dropdownMenu">
@@ -45,22 +45,22 @@
 
 </div>
 
-<!-- Modal de Adicionar Usuário -->
+<!-- Modal de Adicionar Contato -->
 <div id="addUserModal" class="modal-overlay" style="display: none;">
     <div class="modal custom-modal">
-        <h2 class="modal-title">Adicionar Usuário</h2>
+        <h2 class="modal-title">Adicionar Contato</h2>
 
-        <form asp-action="AddUser" asp-controller="Chat" autocomplete="off" method="post" class="modal-form">
+        <form asp-action="AddContact" asp-controller="Chat" autocomplete="off" method="post" class="modal-form">
             @if (ViewBag.Error != null)
             {
                 <div class="modal-alert">@ViewBag.Error</div>
             }
-            <label for="Name">Nome:</label>
-            <input type="text" name="Name" class="modal-input" />
+            <label for="Alias">Nome:</label>
+            <input type="text" name="Alias" class="modal-input" />
 
-            <label for="NumberId">Número ID:</label>
-            <input id="AddNumberId" maxlength="10" type="text" name="NumberId" class="modal-input" required />
-            <input type="text" name="MyNumberId" value="@Model.UserLogged.NumberId" style="display: none;" class="modal-input" required />
+            <label for="ContactNumberId">Número ID:</label>
+            <input id="AddNumberId" maxlength="10" type="text" name="ContactNumberId" class="modal-input" required />
+            <input type="text" name="OwnerNumberId" value="@Model.User?.NumberId" style="display: none;" class="modal-input" required />
 
             <div class="modal-actions">
                 <button type="submit" class="modal-save">Salvar</button>
@@ -76,13 +76,8 @@
 <script defer src="~/js/Chat/js/ajax-functions.js"></script>
 
 <script defer>
-    const contacts = @Html.Raw(Json.Serialize(Model.Contacts));
-    let from = @Html.Raw(Json.Serialize(Model.UserLogged.WebId));
-
-    let openModal = @(ViewBag.OpenModal == true ? "true" : "false");
-    if (openModal){
-        OpenModal(openModal);
-    }
+    const listContacts = @Html.Raw(Json.Serialize(Model.Contacts));
+    let OwnerNumberId = @Html.Raw(Json.Serialize(Model.User.NumberId));
 </script>
 <script defer src="~/js/Chat/js/signalr-events.js"></script>
 <script defer src="~/js/Chat/js/chat-main.js"></script>

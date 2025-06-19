@@ -1,4 +1,3 @@
-using ChatDemo.Services;
 using SignalRChatDemo.ChatHub;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +13,7 @@ if (!Directory.Exists(Directory.GetCurrentDirectory() + "\\Database"))
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddSingleton<ConfigService>();
+builder.Services.AddSingleton<ChatDemo.Business.Interfaces.IConfigService>(o => new ChatDemo.Business.Services.ConfigService(builder.Configuration));
 
 builder.Services.AddSignalR(options =>
 {

@@ -4,9 +4,9 @@ namespace ChatDemo.Controllers
 {
     public class CadastroController : Controller
     {
-        private readonly ChatDemo.Services.ConfigService _configService;
+        private readonly ChatDemo.Business.Interfaces.IConfigService _configService;
 
-        public CadastroController(ChatDemo.Services.ConfigService configService)
+        public CadastroController(ChatDemo.Business.Interfaces.IConfigService configService)
         {
             _configService = configService;
         }
@@ -29,7 +29,7 @@ namespace ChatDemo.Controllers
                 return View("Cadastro", user);
             }
 
-            bool cpfValido = ChatDemo.Helpers.Helpers.ValidateCPF(user.Cpf);
+            bool cpfValido = ChatDemo.Business.Helper.ValidateCPF(user.Cpf);
 
             if (!cpfValido)
             {
@@ -47,7 +47,7 @@ namespace ChatDemo.Controllers
 
             try
             {
-                ChatDemo.DAO.UsersDB usersDB = ChatDemo.Helpers.Helpers.CreateDBUsers(_configService);
+                ChatDemo.DAO.UsersDB usersDB = ChatDemo.Business.Helper.CreateDBUsers(_configService);
 
                 // Verifica se o usuário já existe
                 ChatDemo.Data.User? userExistente = usersDB.GetUserByCpf(user.Cpf);
@@ -57,9 +57,9 @@ namespace ChatDemo.Controllers
                     return View("Cadastro", user);
                 }
 
-                user.Password = ChatDemo.Helpers.Helpers.GerarHashSenha(user.Password);
-                user.WebId = ChatDemo.Helpers.Helpers.GenerateWebId();
-                user.NumberId = ChatDemo.Helpers.Helpers.GerarNumberId();
+                user.Password = ChatDemo.Business.Helper.GerarHashSenha(user.Password);
+                user.WebId = ChatDemo.Business.Helper.GenerateWebId();
+                user.NumberId = ChatDemo.Business.Helper.GerarNumberId();
 
                 bool value = usersDB.AddUser(user);
 

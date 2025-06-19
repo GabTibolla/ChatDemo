@@ -1,35 +1,41 @@
 ﻿@model ChatDemo.Data.Chat
 
 
-@if (Model.SelectedContact != null)
+@if (Model.CurrentConversation != null)
 {
+    // Verifica se o contato está salvo.
+    ChatDemo.Data.Contacts? contact = Model.Contacts?.FirstOrDefault(c => c.ContactNumberId == Model.CurrentConversation.ContactNumberId);
+
     <div class="chat-header">
         <div class="avatar"></div>
         <div>
-            <div>@(Model.SelectedContact.Name ?? Model.SelectedContact.NumberId)</div>
-            <div id="typing-chatArea-@Model.SelectedContact.WebId" style="font-size: 12px; color: gray; margin-top: 2px;"></div>
+            <div>@(contact?.Alias ?? Model.CurrentConversation.ContactNumberId)</div>
+            <div id="typing-chatArea-@Model.CurrentConversation.Id" style="font-size: 12px; color: gray; margin-top: 2px;"></div>
         </div>
     </div>
 
     <div class="chat-messages" id="chatMessages">
-        @foreach (var message in Model.Messages)
+        @if (Model.Messages != null && Model.Messages.Any())
         {
-            if (message.Sent)
+            foreach (var message in Model.Messages)
             {
-                <div class="message sent">
-                    @message.Text
-                    <div class="message-hour">
-                        @message.Datetime.ToString("HH:mm")
-                        <div id="statusMessage" class="status-message @(message.Status == ChatDemo.Data.Message.StatusMessage.Read ? "read" : "") "></div>
+                if (message.SenderNumberId == Model.User.NumberId)
+                {
+                    <div class="message sent">
+                        @message.Text
+                        <div class="message-hour">
+                            @message.Datetime.ToString("HH:mm")
+                            <div id="statusMessage-@message.WebId" class="status-message @(message.Status == ChatDemo.Data.Message.StatusMessage.Read ? "read" : "") "></div>
+                        </div>
                     </div>
-                </div>
-            }
-            else
-            {
-                <div class="message received">
-                    @message.Text
-                    <div class="message-hour">@message.Datetime.ToString("HH:mm")</div>
-                </div>
+                }
+                else
+                {
+                    <div class="message received">
+                        @message.Text
+                        <div class="message-hour">@message.Datetime.ToString("HH:mm")</div>
+                    </div>
+                }
             }
         }
     </div>

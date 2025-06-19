@@ -15,5 +15,10 @@
   "Messages": {
     "ClassName": "ChatDemo.DAO.SQLite.MessagesDBSQLite",
     "ProjectName": "ChatDemo.DAO.SQLite"
+  },
+
+  "Conversations": {
+    "ClassName": "ChatDemo.DAO.SQLite.ConversationDBSQLite",
+    "ProjectName": "ChatDemo.DAO.SQLite"
   }
 }

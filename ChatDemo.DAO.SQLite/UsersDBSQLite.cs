@@ -1,5 +1,4 @@
-﻿using ChatDemo.Data;
-using System.Text;
+﻿using System.Text;
 
 namespace ChatDemo.DAO.SQLite
 {
@@ -9,9 +8,9 @@ namespace ChatDemo.DAO.SQLite
         {
             CreateTableUser();
             CreateTableContacts();
+            CreateTableConversations();
             CreateTableMessages();
         }
-
         public override bool AddUser(ChatDemo.Data.User user)
         {
             var connection = CriarConnection();
@@ -56,7 +55,6 @@ namespace ChatDemo.DAO.SQLite
 
             return retorno;
         }
-
         public override ChatDemo.Data.User? GetUserByNumberId(string numberId)
         {
             var connection = CriarConnection();
@@ -99,7 +97,6 @@ namespace ChatDemo.DAO.SQLite
                 connection.Close();
             }
         }
-
         public override ChatDemo.Data.User? GetUserByWebId(string wid)
         {
             var connection = CriarConnection();
@@ -142,7 +139,6 @@ namespace ChatDemo.DAO.SQLite
                 connection.Close();
             }
         }
-
         public override ChatDemo.Data.User? GetUserByCpf(string cpf)
         {
             var connection = CriarConnection();
@@ -185,7 +181,6 @@ namespace ChatDemo.DAO.SQLite
                 connection.Close();
             }
         }
-
         protected Microsoft.Data.Sqlite.SqliteConnection CriarConnection()
         {
             try
@@ -234,33 +229,13 @@ namespace ChatDemo.DAO.SQLite
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
                     Name TEXT,
                     Cpf TEXT,
-                    Password TEXT,
-                    WebId TEXT UNIQUE,
-                    NumberId TEXT UNIQUE
+                    Password TEXT NOT NULL,
+                    WebId TEXT UNIQUE NOT NULL,
+                    NumberId TEXT UNIQUE NOT NULL
                 )";
             command.ExecuteNonQuery();
             connection.Close();
         }
-
-        private void CreateTableMessages()
-        {
-            var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
-
-            connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Messages (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Text TEXT,
-                    DateTime TEXT,
-                    FromNumberId TEXT,
-                    ToNumberId INTEGER,
-                    Status INTEGER DEFAULT 0
-                )";
-            command.ExecuteNonQuery();
-            connection.Close();
-        }
-
         private void CreateTableContacts()
         {
             var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
@@ -270,13 +245,47 @@ namespace ChatDemo.DAO.SQLite
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Contacts (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Name TEXT,
-                    NumberId TEXT NOT NULL,
-                    MyNumberId TEXT NOT NULL,
-                    LastMessageId INTEGER,
-                    LastMessageDate TEXT,
+                    Alias TEXT,
+                    OwnerNumberId TEXT NOT NULL,
+                    ContactNumberId TEXT NOT NULL,
+                    UNIQUE(OwnerNumberId, ContactNumberId)
+                )";
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+        private void CreateTableConversations()
+        {
+            var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Conversations (
+                    Id TEXT PRIMARY KEY,
+                    ContactNumberId TEXT NOT NULL,
+                    OwnerNumberId TEXT NOT NULL,
+                    JsonEvent TEXT DEFAULT NULL,
+                    CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+            ";
+
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+        private void CreateTableMessages()
+        {
+            var connection = new Microsoft.Data.Sqlite.SqliteConnection(_connectionString);
+
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Messages (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ConversationId TEXT NOT NULL,
+                    SenderNumberId TEXT NOT NULL,
                     WebId TEXT NOT NULL,
-                    JsonEvent TEXT DEFAULT NULL
+                    Text TEXT,
+                    DateTime TEXT,
+                    Status INTEGER DEFAULT 0
                 )";
             command.ExecuteNonQuery();
             connection.Close();

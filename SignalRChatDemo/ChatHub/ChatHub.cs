@@ -7,6 +7,8 @@ namespace SignalRChatDemo.ChatHub
     {
         private static ConcurrentDictionary<string, string> userConnections = new();
 
+        #region [ Funções de gerenciamento de conexão do usuário ] 
+
         public override Task OnConnectedAsync()
         {
             var user = Context.GetHttpContext().Request.Query["username"].ToString();
@@ -25,32 +27,34 @@ namespace SignalRChatDemo.ChatHub
             return userConnections.FirstOrDefault(x => x.Value == userId).Key;
         }
 
-        public async Task SendStatusMessage(string userSelected, string guidMessage)
+        #endregion
+
+        public async Task SendStatusMessage(string currentContact, string guidMessage)
         {
-            var connectionId = GetConnectionIdByUser(userSelected);
+            var connectionId = GetConnectionIdByUser(currentContact);
             if (connectionId != null)
             {
-                await Clients.Client(connectionId).SendAsync("ReceiveStatusMessage", userSelected, guidMessage);
+                await Clients.Client(connectionId).SendAsync("ReceiveStatusMessage", guidMessage);
             }
         }
 
-        public async Task SendMessage(string userLogged, string userSelected, string message, string guidMessage, string time)
+        public async Task SendMessage(string ownerNumberId, string currentContact, string message, string guidMessage, string time)
         {
-            var connectionId = GetConnectionIdByUser(userSelected);
+            var connectionId = GetConnectionIdByUser(currentContact);
 
             if (connectionId != null)
             {
-                await Clients.Client(connectionId).SendAsync("ReceiveMessage", userLogged, message, guidMessage, time);
+                await Clients.Client(connectionId).SendAsync("ReceiveMessage", ownerNumberId, message, guidMessage, time);
             }
         }
 
-        public async Task Typing(string userLogged, string userSelected)
+        public async Task Typing(string ownerNumberId, string currentContact)
         {
-            var connectionId = GetConnectionIdByUser(userSelected);
+            var connectionId = GetConnectionIdByUser(currentContact);
 
             if (connectionId != null)
             {
-                await Clients.Client(connectionId).SendAsync("UserTyping", userLogged);
+                await Clients.Client(connectionId).SendAsync("UserTyping", ownerNumberId);
             }
         }
     }

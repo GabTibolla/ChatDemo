@@ -1,6 +1,6 @@
-﻿let globalIdContact = "";
+﻿let currentContact = "";
 let typingTimeout = { timeoutId: null };
 
 $(function () {
-    IniciarSignalR(from, globalIdContact, contacts, typingTimeout, SendMessageToController)
+    IniciarSignalR(OwnerNumberId, listContacts, typingTimeout, SendMessageToController)
 });

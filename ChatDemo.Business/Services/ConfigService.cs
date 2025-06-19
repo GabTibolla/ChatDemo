@@ -1,6 +1,8 @@
-﻿namespace ChatDemo.Services
+﻿using Microsoft.Extensions.Configuration;
+
+namespace ChatDemo.Business.Services
 {
-    public class ConfigService
+    public class ConfigService : ChatDemo.Business.Interfaces.IConfigService
     {
         private readonly IConfiguration _configuration;
 

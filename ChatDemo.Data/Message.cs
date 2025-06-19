@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ChatDemo.Data
+﻿namespace ChatDemo.Data
 {
     public class Message
     {
@@ -17,11 +11,11 @@ namespace ChatDemo.Data
 
 
         public int Id { get; set; }
+        public string WebId { get; set; }
+        public string? ConversationId { get; set; }
+        public string? SenderNumberId { get; set; }
         public string? Text { get; set; }
         public DateTime Datetime { get; set; }
-        public string FromNumberId { get; set; }
-        public string ToNumberId { get; set; }
-        public bool Sent { get; set; }
         public StatusMessage Status { get; set; }
     }
 }
